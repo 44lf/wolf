@@ -1,0 +1,4257 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>物联网神探：科技馆失窃案 - 增强版</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 悬疑科技风CSS */
+        :root {
+            --primary-bg: #0A192F;
+            --secondary-bg: #0f1b38;
+            --accent-blue: #00D4FF;
+            --accent-cyan: #0FF0FC;
+            --accent-red: #FF375F;
+            --accent-green: #4CAF50;
+            --accent-yellow: #FFD700;
+            --accent-purple: #9C27B0;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B7C3;
+            --card-bg: rgba(15, 27, 56, 0.8);
+            --border-glow: rgba(0, 212, 255, 0.3);
+            --grid-color: rgba(0, 212, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Inter', 'Orbitron', sans-serif;
+        }
+        
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+        
+        /* 数据流动画背景 */
+        .data-stream {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .stream-line {
+            position: absolute;
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--accent-blue), transparent);
+            animation: streamFlow 15s linear infinite;
+        }
+        
+        @keyframes streamFlow {
+            0% { transform: translateY(-100px); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(100vh); opacity: 0; }
+        }
+        
+        /* 游戏容器 */
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部区域 */
+        .game-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-glow);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .game-header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan), var(--accent-red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 10px rgba(0, 212, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(15, 240, 252, 0.8)); }
+        }
+        
+        .game-header .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        
+        /* 主游戏区域 - 三栏布局 */
+        .game-main {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 25px;
+            margin-bottom: 30px;
+            min-height: 700px;
+        }
+        
+        @media (max-width: 1200px) {
+            .game-main {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 左侧栏：角色与技能 */
+        .left-sidebar {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        /* 中间栏：场景展示 */
+        .scene-container {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-glow);
+            padding: 30px;
+            min-height: 650px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 右侧栏：系统与收集 */
+        .right-sidebar {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-glow);
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        /* 通用卡片样式 */
+        .card {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: var(--border-glow);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 212, 255, 0.15);
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 角色卡片 */
+        .role-card {
+            text-align: center;
+        }
+        
+        .role-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            border: 3px solid var(--accent-blue);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+        
+        .skill-card {
+            position: relative;
+        }
+        
+        .skill-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 15px;
+            background-color: rgba(0, 212, 255, 0.1);
+            border: 2px solid var(--accent-blue);
+        }
+        
+        .skill-cooldown {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--accent-red);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            color: var(--primary-bg);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-glow);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, var(--accent-green), #66BB6A);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(90deg, var(--accent-yellow), #FFB74D);
+            color: #333;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(90deg, var(--accent-red), #EF5350);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* 场景内容 */
+        .scene-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--accent-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .scene-content {
+            line-height: 1.7;
+            margin-bottom: 25px;
+            font-size: 1.05rem;
+        }
+        
+        /* 证据网格 */
+        .evidence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .evidence-item {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            position: relative;
+        }
+        
+        .evidence-item:hover {
+            border-color: var(--accent-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.2);
+        }
+        
+        .evidence-item.collected {
+            border-color: var(--accent-green);
+        }
+        
+        .evidence-icon {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: var(--accent-blue);
+        }
+        
+        /* 物联网三层结构可视化 */
+        .iot-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .layer {
+            padding: 15px;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .layer.perception {
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.1), transparent);
+            border-left: 4px solid var(--accent-blue);
+        }
+        
+        .layer.network {
+            background: linear-gradient(90deg, rgba(15, 240, 252, 0.1), transparent);
+            border-left: 4px solid var(--accent-cyan);
+        }
+        
+        .layer.application {
+            background: linear-gradient(90deg, rgba(255, 55, 95, 0.1), transparent);
+            border-left: 4px solid var(--accent-red);
+        }
+        
+        .layer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .layer-devices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .device-tag {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        /* 选择分支样式 */
+        .branch-choices {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 25px 0;
+        }
+        
+        .choice-option {
+            background-color: var(--secondary-bg);
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .choice-option:hover {
+            border-color: var(--accent-cyan);
+            background-color: rgba(15, 240, 252, 0.05);
+            transform: translateX(5px);
+        }
+        
+        .choice-option::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background-color: var(--accent-cyan);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .choice-option:hover::before {
+            transform: scaleY(1);
+        }
+        
+        .choice-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-cyan);
+        }
+        
+        /* 迷你游戏容器 */
+        .minigame-container {
+            background-color: var(--secondary-bg);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 2px solid var(--border-glow);
+        }
+        
+        .minigame-title {
+            color: var(--accent-yellow);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .minigame-instructions {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        /* 成就卡片 */
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .achievement-card {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .achievement-card.locked {
+            filter: grayscale(1);
+            opacity: 0.6;
+        }
+        
+        .achievement-card.unlocked {
+            border: 2px solid var(--accent-yellow);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        
+        .achievement-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: var(--accent-yellow);
+        }
+        
+        /* 收集图鉴 */
+        .collection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        
+        .collection-item {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .collection-item.unlocked {
+            border: 2px solid var(--accent-green);
+        }
+        
+        .collection-item.locked {
+            filter: grayscale(1);
+            opacity: 0.4;
+        }
+        
+        /* 排行榜 */
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 15px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .leaderboard-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .leaderboard-rank {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background-color: var(--accent-blue);
+            color: var(--primary-bg);
+        }
+        
+        /* 模态对话框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 25, 47, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal.active {
+            display: flex;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 30px;
+            border: 1px solid var(--border-glow);
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.8rem;
+            cursor: pointer;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--accent-red);
+            transform: rotate(90deg);
+        }
+        
+        /* 粒子特效 */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 1200px) {
+            .game-main {
+                grid-template-columns: 1fr;
+            }
+            
+            .left-sidebar, .right-sidebar {
+                order: 3;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .evidence-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+            
+            .achievement-grid, .collection-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            }
+        }
+        
+        /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: var(--secondary-bg);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        /* Toast消息 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 1001;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: toastSlideIn 0.3s ease-out;
+            max-width: 350px;
+            word-break: break-word;
+            backdrop-filter: blur(10px);
+        }
+        
+        .toast.success {
+            background-color: rgba(76, 175, 80, 0.9);
+            color: white;
+            border-left: 5px solid #388E3C;
+        }
+        
+        .toast.error {
+            background-color: rgba(255, 55, 95, 0.9);
+            color: white;
+            border-left: 5px solid #D32F2F;
+        }
+        
+        .toast.warning {
+            background-color: rgba(255, 193, 7, 0.9);
+            color: #333;
+            border-left: 5px solid #FFA000;
+        }
+        
+        .toast.info {
+            background-color: rgba(0, 212, 255, 0.9);
+            color: white;
+            border-left: 5px solid #0288D1;
+        }
+        
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        /* 时间限制指示器 */
+        .timer-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 2px solid var(--accent-red);
+        }
+        
+        .timer {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+        
+        /* 技能冷却指示器 */
+        .cooldown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 1.5rem;
+            color: white;
+            font-weight: bold;
+        }/* ================ 新增：数据收集系统样式 ================ */
+.student-info-display {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: var(--accent-green);
+    background: rgba(0, 212, 255, 0.1);
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    border: 1px solid var(--border-glow);
+}
+
+.teacher-panel-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    background: rgba(156, 39, 176, 0.8);
+    border: 2px solid var(--accent-purple);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    display: none;
+}
+
+.teacher-panel-btn:hover {
+    background: rgba(156, 39, 176, 1);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(156, 39, 176, 0.4);
+}
+
+.data-collection-status {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 998;
+    border: 1px solid var(--border-glow);
+    backdrop-filter: blur(10px);
+}
+
+.data-collection-status .status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: var(--accent-green);
+    animation: pulse 2s infinite;
+}
+
+.data-collection-status.offline .status-dot {
+    background-color: var(--accent-red);
+    animation: none;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+    </style>
+</head>
+<body>
+    <!-- 教师数据面板按钮（仅教师可见） -->
+    <button class="teacher-panel-btn" id="teacherPanelBtn">
+        <i class="fas fa-chart-bar"></i> 教师面板
+    </button>
+
+    <!-- 数据收集状态指示器 -->
+    <div class="data-collection-status" id="dataStatus">
+        <div class="status-dot"></div>
+        <span>数据收集中...</span>
+    </div>
+    
+    <!-- 动态数据流背景 -->
+    <div class="data-stream" id="dataStream"></div>
+    
+    <!-- 游戏主容器 -->
+    <div class="game-container">
+        <!-- 游戏头部 -->
+        <header class="game-header">
+            <h1><i class="fas fa-user-secret"></i> 物联网神探：科技馆失窃案</h1>
+            <p class="subtitle">增强版 - 融合角色技能、分支剧情、迷你游戏与成就收集的物联网学习体验</p>
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 15px;">
+                <span style="color: var(--accent-blue);"><i class="fas fa-clock"></i> 当前时间: <span id="currentTime">00:00</span></span>
+                <span style="color: var(--accent-cyan);"><i class="fas fa-star"></i> 得分: <span id="totalScore">0</span></span>
+                <span style="color: var(--accent-green);"><i class="fas fa-trophy"></i> 成就: <span id="achievementCount">0</span>/12</span>
+            </div>
+        </header>
+        
+        <!-- 主游戏区域 -->
+        <main class="game-main">
+            <!-- 左侧栏：角色与技能 -->
+            <aside class="left-sidebar">
+                <div class="card role-card">
+                    <h3 class="card-title"><i class="fas fa-user-tie"></i> 当前角色</h3>
+                    <div class="role-avatar" id="roleAvatar">
+                        <i class="fas fa-user-secret"></i>
+                    </div>
+                    <h3 id="roleName">安防工程师</h3>
+                    <p id="roleDescription" style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 10px;">
+                        负责物联门锁系统安全
+                    </p>
+                </div>
+                
+                <div class="card skill-card">
+                    <h3 class="card-title"><i class="fas fa-magic"></i> 角色技能</h3>
+                    <div class="skill-icon" id="skillIcon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                    <h4 id="skillName">快速分析门锁系统</h4>
+                    <p id="skillDescription" style="color: var(--text-secondary); font-size: 0.9rem; margin: 10px 0;">
+                        在第一幕自动解锁一个门锁相关证据
+                    </p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="skillCooldownBar" style="width: 0%"></div>
+                    </div>
+                    <button class="btn btn-primary" id="useSkillBtn" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-bolt"></i> 使用技能
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-list-ol"></i> 案件进度</h3>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>调查进度</span>
+                            <span id="investigationProgress">20%</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="investigationProgressBar" style="width: 20%"></div>
+                        </div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                            <span>证据收集</span>
+                            <span id="evidenceProgress">0/20</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="evidenceProgressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- 中间栏：场景展示与交互 -->
+            <section class="scene-container">
+                <div id="timerContainer" class="timer-container" style="display: none;">
+                    <i class="fas fa-clock"></i>
+                    <div class="timer" id="gameTimer">60</div>
+                    <span>秒</span>
+                </div>
+                
+                <h2 class="scene-title" id="sceneTitle">
+                    <i class="fas fa-map-marker-alt"></i> 第一幕：案发现场
+                </h2>
+                
+                <div class="scene-content" id="sceneContent">
+                    <!-- 内容将通过JavaScript动态生成 -->
+                </div>
+                
+                <!-- 证据网格容器 -->
+                <div id="evidenceGridContainer"></div>
+                
+                <!-- 物联网三层结构容器 -->
+                <div id="iotLayersContainer"></div>
+                
+                <!-- 选择分支容器 -->
+                <div id="branchChoicesContainer"></div>
+                
+                <!-- 迷你游戏容器 -->
+                <div id="minigameContainer"></div>
+                
+                <!-- 行动按钮容器 -->
+                <div class="action-buttons" id="actionButtonsContainer" style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 25px;">
+                    <!-- 行动按钮将通过JavaScript动态生成 -->
+                </div>
+            </section>
+            
+            <!-- 右侧栏：系统与收集 -->
+            <aside class="right-sidebar">
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-trophy"></i> 成就系统</h3>
+                    <div class="achievement-grid" id="achievementGrid">
+                        <!-- 成就卡片将通过JavaScript动态生成 -->
+                    </div>
+                    <button class="btn btn-secondary" id="viewAllAchievementsBtn" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-award"></i> 查看全部成就
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-book"></i> 物联网图鉴</h3>
+                    <div class="collection-grid" id="collectionGrid">
+                        <!-- 收集项将通过JavaScript动态生成 -->
+                    </div>
+                    <button class="btn btn-secondary" id="viewAllCollectionsBtn" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-book-open"></i> 查看完整图鉴
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class="fas fa-chart-line"></i> 班级排行榜</h3>
+                    <div class="leaderboard-list" id="leaderboardList">
+                        <!-- 排行榜条目将通过JavaScript动态生成 -->
+                    </div>
+                    <button class="btn btn-secondary" id="refreshLeaderboardBtn" style="width: 100%; margin-top: 15px;">
+                        <i class="fas fa-sync-alt"></i> 刷新排行榜
+                    </button>
+                </div>
+            </aside>
+        </main>
+        
+        <!-- 游戏导航 -->
+        <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+            <button class="btn btn-secondary" id="prevSceneBtn">
+                <i class="fas fa-arrow-left"></i> 上一幕
+            </button>
+            <button class="btn btn-primary" id="nextSceneBtn">
+                下一幕 <i class="fas fa-arrow-right"></i>
+            </button>
+            <button class="btn btn-warning" id="saveGameBtn">
+                <i class="fas fa-save"></i> 保存进度
+            </button>
+            <button class="btn btn-danger" id="resetGameBtn">
+                <i class="fas fa-redo"></i> 重新开始
+            </button>
+        </div>
+    </div>
+    
+    <!-- 模态对话框：角色选择 -->
+    <div class="modal" id="roleSelectionModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeRoleModal">&times;</button>
+            <h2 style="color: var(--accent-blue); text-align: center; margin-bottom: 25px;">
+                <i class="fas fa-users"></i> 选择你的侦探角色
+            </h2>
+            <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px;">
+                每个角色拥有独特的技能，将影响你的调查方式和游戏体验
+            </p>
+            
+            <div id="roleSelectionGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px;">
+                <!-- 角色选项将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态对话框：成就详情 -->
+    <div class="modal" id="achievementsModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeAchievementsModal">&times;</button>
+            <h2 style="color: var(--accent-yellow); text-align: center; margin-bottom: 25px;">
+                <i class="fas fa-trophy"></i> 成就大厅
+            </h2>
+            
+            <div id="allAchievementsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px;">
+                <!-- 全部成就将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态对话框：收集图鉴 -->
+    <div class="modal" id="collectionsModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeCollectionsModal">&times;</button>
+            <h2 style="color: var(--accent-green); text-align: center; margin-bottom: 25px;">
+                <i class="fas fa-book"></i> 物联网设备图鉴
+            </h2>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: var(--accent-blue); margin-bottom: 15px;">
+                    <i class="fas fa-eye"></i> 传感器图鉴
+                </h3>
+                <div id="sensorCollectionGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+                    <!-- 传感器收集项将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            
+            <div>
+                <h3 style="color: var(--accent-cyan); margin-bottom: 15px;">
+                    <i class="fas fa-network-wired"></i> 网络设备图鉴
+                </h3>
+                <div id="networkCollectionGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+                    <!-- 网络设备收集项将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态对话框：迷你游戏 -->
+    <div class="modal" id="minigameModal">
+        <div class="modal-content">
+            <button class="close-modal" id="closeMinigameModal">&times;</button>
+            <div id="minigameContent">
+                <!-- 迷你游戏内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- 模态对话框：游戏结束 -->
+    <div class="modal" id="endGameModal">
+        <div class="modal-content game-end">
+            <h2 id="gameEndTitle" style="font-size: 2.5rem; margin-bottom: 20px; color: var(--accent-blue);">案件侦破！</h2>
+            <p id="gameEndMessage" style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px;"></p>
+            
+            <div class="score-display" style="font-size: 1.8rem; margin: 30px 0; color: var(--accent-cyan);">
+                案件分析得分：<span id="finalScore">0</span>/100
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0;">
+                <div class="layer perception" style="opacity: 1; padding: 20px;">
+                    <div class="layer-header">
+                        <h3><i class="fas fa-eye"></i> 感知层掌握</h3>
+                        <span id="perceptionScore" style="font-size: 1.5rem; color: var(--accent-blue);">0%</span>
+                    </div>
+                    <div class="progress-container" style="margin-top: 10px;">
+                        <div class="progress-bar" id="perceptionProgressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="layer network" style="opacity: 1; padding: 20px;">
+                    <div class="layer-header">
+                        <h3><i class="fas fa-network-wired"></i> 网络层掌握</h3>
+                        <span id="networkScore" style="font-size: 1.5rem; color: var(--accent-cyan);">0%</span>
+                    </div>
+                    <div class="progress-container" style="margin-top: 10px;">
+                        <div class="progress-bar" id="networkProgressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="layer application" style="opacity: 1; padding: 20px;">
+                    <div class="layer-header">
+                        <h3><i class="fas fa-brain"></i> 应用层掌握</h3>
+                        <span id="applicationScore" style="font-size: 1.5rem; color: var(--accent-red);">0%</span>
+                    </div>
+                    <div class="progress-container" style="margin-top: 10px;">
+                        <div class="progress-bar" id="applicationProgressBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="action-buttons" style="display: flex; flex-direction: column; gap: 15px; margin-top: 40px;">
+                <button class="btn btn-primary" id="restartGameBtn">
+                    <i class="fas fa-redo"></i> 重新开始案件
+                </button>
+                <button class="btn btn-secondary" id="shareResultsBtn">
+                    <i class="fas fa-share-alt"></i> 分享成绩
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 音频元素 -->
+    <audio id="bgMusic" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="clickSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="successSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="errorSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        // ================ 游戏核心系统 ================
+        
+        // 游戏状态管理
+        const gameState = {
+            // 基础状态
+            currentScene: 1,
+            totalScenes: 5,
+            score: 0,
+            startTime: null,
+            playTime: 0,
+            
+            // 角色相关
+            playerRole: null,
+            skillUsed: false,
+            skillCooldown: 0,
+            
+            // 收集系统
+            collectedEvidence: [],
+            analyzedLayers: {
+                perception: false,
+                network: false,
+                application: false
+            },
+            
+            // 成就系统
+            unlockedAchievements: [],
+            
+            // 收集图鉴
+            unlockedDevices: [],
+            
+            // 分支选择记录
+            branchChoices: {},
+            
+            // 迷你游戏记录
+            minigameScores: {},
+            
+            // 意外事件触发记录
+            triggeredEvents: []
+        };
+        
+        // 角色系统
+        const roles = {
+            "security_engineer": {
+                id: "security_engineer",
+                name: "安防工程师",
+                description: "负责物联门锁系统安全，擅长分析安防漏洞",
+                icon: "fa-lock",
+                color: "#00D4FF",
+                skill: {
+                    name: "快速分析门锁系统",
+                    description: "在第一幕自动解锁一个门锁相关证据，并增加10%分析速度",
+                    icon: "fa-search",
+                    cooldown: 2,
+                    effect: "auto_unlock_evidence"
+                }
+            },
+            "network_admin": {
+                id: "network_admin",
+                name: "网络管理员",
+                description: "管理全馆网络层设备，擅长追踪数据流向",
+                icon: "fa-network-wired",
+                color: "#0FF0FC",
+                skill: {
+                    name: "数据包分析",
+                    description: "在第二幕额外获得一条网络日志线索，网络层分析得分+20%",
+                    icon: "fa-project-diagram",
+                    cooldown: 1,
+                    effect: "extra_network_clue"
+                }
+            },
+            "sensor_expert": {
+                id: "sensor_expert",
+                name: "传感器专家",
+                description: "维护各类感知层设备，擅长识别传感器数据异常",
+                icon: "fa-sliders-h",
+                color: "#4CAF50",
+                skill: {
+                    name: "精准校准",
+                    description: "所有感知层证据分析得分+25%，解锁隐藏传感器图鉴",
+                    icon: "fa-tachometer-alt",
+                    cooldown: 0,
+                    effect: "perception_boost"
+                }
+            },
+            "software_architect": {
+                id: "software_architect",
+                name: "软件架构师",
+                description: "设计应用层程序，擅长发现逻辑漏洞",
+                icon: "fa-code",
+                color: "#FF375F",
+                skill: {
+                    name: "反编译",
+                    description: "第三幕可直接查看应用层漏洞，应用层分析得分+30%",
+                    icon: "fa-file-code",
+                    cooldown: 3,
+                    effect: "direct_vulnerability_view"
+                }
+            },
+            "data_detective": {
+                id: "data_detective",
+                name: "数据侦探",
+                description: "擅长从海量数据中发现关键线索",
+                icon: "fa-search",
+                color: "#9C27B0",
+                skill: {
+                    name: "线索关联",
+                    description: "高亮显示相关证据之间的联系，发现隐藏关联线索",
+                    icon: "fa-link",
+                    cooldown: 1,
+                    effect: "highlight_connections"
+                }
+            },
+            "system_analyst": {
+                id: "system_analyst",
+                name: "系统分析师",
+                description: "全面分析物联网系统架构，擅长整体视角",
+                icon: "fa-eye",
+                color: "#FFD700",
+                skill: {
+                    name: "系统透视",
+                    description: "提前一场景激活一个物联网层级，全局分析得分+15%",
+                    icon: "fa-layer-group",
+                    cooldown: 4,
+                    effect: "early_layer_activation"
+                }
+            }
+        };
+        
+        // 游戏场景数据
+        const scenes = [
+            {
+                id: 1,
+                title: "第一幕：案发现场",
+                icon: "fa-map-marker-alt",
+                content: `
+                    <p><strong>时间：2045年10月26日 08:30</strong></p>
+                    <p>未来科技馆的镇馆之宝"智慧核心"在夜间失窃。展柜采用最先进的物联安防系统，包括智能门锁、摄像头、运动传感器等，但系统日志显示一切正常，只有门锁系统有0.3秒的异常离线记录。</p>
+                    <p>作为馆内<strong id="dynamicRoleName">专家</strong>，你被紧急召集调查此案。你需要利用物联网知识，分析系统漏洞，找出失窃真相。</p>
+                    
+                    <div style="background: rgba(0,212,255,0.1); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid var(--accent-blue);">
+                        <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> 学习目标</h4>
+                        <p>理解物联网系统工作过程：<strong>感知数据 → 传输数据 → 处理数据 → 呈现数据</strong></p>
+                    </div>
+                    
+                    <h3 style="margin-top: 25px; color: var(--accent-cyan);">
+                        <i class="fas fa-search"></i> 现场发现的可疑证据：
+                    </h3>
+                `,
+                evidences: [
+                    { id: "rfid-log", name: "RFID读卡器日志", icon: "fa-id-card", layer: "perception", 
+                      description: "显示最后刷卡时间为昨晚23:45，卡号为A7-429B。但持卡人声称当时不在现场。" },
+                    { id: "camera-footage", name: "摄像头片段", icon: "fa-video", layer: "perception", 
+                      description: "画面在23:44-23:46期间出现2秒模糊，疑似受到信号干扰。" },
+                    { id: "fingerprint-log", name: "指纹验证日志", icon: "fa-fingerprint", layer: "perception", 
+                      description: "显示一次失败的指纹验证尝试，时间与RFID刷卡时间接近。" },
+                    { id: "network-log", name: "网络传输日志", icon: "fa-wifi", layer: "network", 
+                      description: "发现异常数据传输记录，有未知设备通过蓝牙短暂接入系统。" }
+                ],
+                actions: [
+                    { id: "examine-lock", name: "检查智能门锁", icon: "fa-lock", 
+                      description: "仔细检查物联门锁系统的物理状态和日志记录。" },
+                    { id: "interview-guard", name: "询问值班保安", icon: "fa-user-shield", 
+                      description: "了解昨晚的巡查情况和异常发现。" },
+                    { id: "review-system", name: "查看安防系统", icon: "fa-shield-alt", 
+                      description: "调取完整的物联网安防系统运行记录。" }
+                ],
+                branch: null,
+                minigame: null
+            },
+            {
+                id: 2,
+                title: "第二幕：数据追踪",
+                icon: "fa-satellite-dish",
+                content: `
+                    <p>你调取了物联系统的完整日志，开始追踪数据流向。物联网系统的<strong>网络层</strong>负责数据传输，你需要分析数据是如何在各个设备间流动的。</p>
+                    
+                    <p><strong>发现：</strong>在案发时间，环境监控系统检测到展柜内部"湿度异常"，并自动执行了通风程序。这个联动操作没有经过二次验证！</p>
+                    
+                    <div style="background: rgba(15,240,252,0.1); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid var(--accent-cyan);">
+                        <h4 style="color: var(--accent-cyan); margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> 学习目标</h4>
+                        <p>理解物联网网络层：负责<strong>数据传输</strong>，包括WiFi、蓝牙、移动网络等通信方式</p>
+                    </div>
+                    
+                    <h3 style="margin-top: 25px; color: var(--accent-cyan);">
+                        <i class="fas fa-network-wired"></i> 网络层设备与协议：
+                    </h3>
+                `,
+                evidences: [
+                    { id: "wifi-router", name: "WiFi路由器日志", icon: "fa-wifi", layer: "network", 
+                      description: "发现未知设备通过伪装MAC地址接入网络，但只连接了2分钟。" },
+                    { id: "bluetooth-log", name: "蓝牙设备记录", icon: "fa-bluetooth", layer: "network", 
+                      description: "有一个未知蓝牙设备在案发时段尝试与门锁配对，但未成功。" },
+                    { id: "server-log", name: "服务器访问记录", icon: "fa-server", layer: "application", 
+                      description: "云端服务器在23:45收到来自环境传感器的'湿度异常'警报。" },
+                    { id: "mobile-data", name: "移动网络记录", icon: "fa-signal", layer: "network", 
+                      description: "系统向管理员手机发送了门锁状态变更通知，但管理员称未收到。" }
+                ],
+                actions: [
+                    { id: "trace-dataflow", name: "追踪数据流向", icon: "fa-project-diagram", 
+                      description: "绘制案发时段的数据传输路径图。" },
+                    { id: "analyze-protocols", name: "分析通信协议", icon: "fa-broadcast-tower", 
+                      description: "检查系统使用的网络协议是否存在安全漏洞。" },
+                    { id: "check-firewall", name: "检查防火墙日志", icon: "fa-fire", 
+                      description: "查看网络安全设备是否记录了异常访问。" }
+                ],
+                branch: {
+                    id: "scene2_choice1",
+                    question: "发现异常网络流量，你会先追踪哪个方向？",
+                    options: [
+                        {
+                            text: "追踪内部设备通信",
+                            result: "发现内部员工设备异常，获得线索：内部人员可能涉案",
+                            score: 15,
+                            nextClue: "internal_device_log",
+                            effect: "unlock_evidence:internal_log"
+                        },
+                        {
+                            text: "追踪外部入侵痕迹", 
+                            result: "发现黑客从外部VPN接入的证据，获得线索：外部黑客攻击",
+                            score: 20,
+                            nextClue: "external_hack_trace",
+                            effect: "unlock_evidence:hack_trace"
+                        },
+                        {
+                            text: "同时追踪两个方向",
+                            result: "资源分散，只发现模糊线索，但获得全面视角",
+                            score: 10,
+                            nextClue: "ambiguous_trace",
+                            effect: "bonus_score:5"
+                        }
+                    ]
+                },
+                minigame: "packet_sorting"
+            },
+            {
+                id: 3,
+                title: "第三幕：系统逻辑分析",
+                icon: "fa-brain",
+                content: `
+                    <p>现在你需要分析物联网系统的<strong>应用层</strong>逻辑。应用层负责数据处理和决策，这是系统的"大脑"。</p>
+                    
+                    <p><strong>关键发现：</strong>你找到了系统漏洞！环境监控系统有一条规则："当检测到湿度异常时，自动启动展柜通风系统"。这条规则没有设置权限验证，导致黑客可以通过伪造传感器数据触发通风系统，从而打开展柜！</p>
+                    
+                    <div style="background: rgba(255,55,95,0.1); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid var(--accent-red);">
+                        <h4 style="color: var(--accent-red); margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> 学习目标</h4>
+                        <p>理解物联网应用层：负责<strong>数据处理与呈现</strong>，包括云端平台、应用程序和智能终端</p>
+                    </div>
+                    
+                    <h3 style="margin-top: 25px; color: var(--accent-cyan);">
+                        <i class="fas fa-code"></i> 应用层组件分析：
+                    </h3>
+                `,
+                evidences: [
+                    { id: "software-code", name: "应用程序代码", icon: "fa-code", layer: "application", 
+                      description: "发现通风系统的联动代码缺少权限验证模块，存在安全漏洞。" },
+                    { id: "user-interface", name: "管理界面日志", icon: "fa-tv", layer: "application", 
+                      description: "管理员账户在案发时段没有登录记录，排除内部人员作案。" },
+                    { id: "cloud-platform", name: "云平台配置", icon: "fa-cloud", layer: "application", 
+                      description: "发现智能家居平台的联动规则配置错误，通风系统与门锁系统权限混淆。" },
+                    { id: "database-record", name: "数据库操作记录", icon: "fa-database", layer: "application", 
+                      description: "案发时段有异常数据写入操作，修改了系统日志记录。" }
+                ],
+                actions: [
+                    { id: "review-code", name: "审查应用程序代码", icon: "fa-file-code", 
+                      description: "仔细检查物联网系统的处理逻辑和权限验证机制。" },
+                    { id: "test-vulnerability", name: "测试系统漏洞", icon: "fa-bug", 
+                      description: "尝试复现黑客可能利用的系统漏洞。" },
+                    { id: "analyze-logic", name: "分析业务逻辑", icon: "fa-sitemap", 
+                      description: "梳理物联网系统的决策流程和联动规则。" }
+                ],
+                branch: {
+                    id: "scene3_choice1",
+                    question: "发现系统漏洞，你会立即修复还是继续监控？",
+                    options: [
+                        {
+                            text: "立即修复漏洞",
+                            result: "系统安全提升，但黑客察觉到变化，线索中断",
+                            score: 10,
+                            nextClue: "security_enhanced",
+                            effect: "layer_activation:perception"
+                        },
+                        {
+                            text: "设置蜜罐继续监控",
+                            result: "黑客再次攻击时被记录，获得关键证据",
+                            score: 25,
+                            nextClue: "honey_pot_success",
+                            effect: "unlock_achievement:smart_trap"
+                        },
+                        {
+                            text: "联系网络安全部门",
+                            result: "团队协作，获得更多资源，但行动较慢",
+                            score: 15,
+                            nextClue: "team_collaboration",
+                            effect: "bonus_score:10"
+                        }
+                    ]
+                },
+                minigame: "protocol_matching"
+            },
+            {
+                id: 4,
+                title: "第四幕：真相还原",
+                icon: "fa-search",
+                content: `
+                    <p>基于前三幕的调查，你现在可以还原案件真相了。结合物联网的三层结构分析，你能推断出入侵者的作案手法。</p>
+                    
+                    <p><strong>作案手法还原：</strong></p>
+                    <ol style="margin-left: 20px; margin-top: 10px;">
+                        <li>黑客首先通过<strong>网络层</strong>的蓝牙漏洞，向环境传感器注入伪造的"湿度异常"数据。</li>
+                        <li>环境传感器（<strong>感知层</strong>）采集到伪造数据，通过WiFi传输到云端服务器。</li>
+                        <li>云端应用（<strong>应用层</strong>）根据错误规则，未经二次验证就向通风系统发出开启指令。</li>
+                        <li>通风系统启动，联动机制错误地打开了展柜门锁。</li>
+                    </ol>
+                    
+                    <div style="background: rgba(156,39,176,0.1); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #9C27B0;">
+                        <h4 style="color: #9C27B0; margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> 学习目标</h4>
+                        <p>掌握物联网三层结构模型：<strong>感知层 → 网络层 → 应用层</strong></p>
+                    </div>
+                    
+                    <h3 style="margin-top: 25px; color: var(--accent-cyan);">
+                        <i class="fas fa-layer-group"></i> 物联网三层结构完整分析：
+                    </h3>
+                `,
+                evidences: [
+                    { id: "full-analysis", name: "完整案件分析报告", icon: "fa-file-alt", layer: "all", 
+                      description: "基于物联网三层结构对案件进行完整技术分析。" },
+                    { id: "vulnerability-report", name: "系统漏洞报告", icon: "fa-exclamation-triangle", layer: "all", 
+                      description: "详细列出物联网安防系统的所有安全漏洞。" },
+                    { id: "fix-suggestions", name: "修复建议方案", icon: "fa-tools", layer: "all", 
+                      description: "提出基于物联网三层结构的安全加固方案。" },
+                    { id: "prevention-plan", name: "未来预防计划", icon: "fa-clipboard-check", layer: "all", 
+                      description: "制定防止类似事件再次发生的技术和管理措施。" }
+                ],
+                actions: [
+                    { id: "reconstruct-crime", name: "重建犯罪过程", icon: "fa-cogs", 
+                      description: "使用物联网三层结构模型完整还原作案过程。" },
+                    { id: "identify-culprit", name: "推断嫌疑人特征", icon: "fa-user-ninja", 
+                      description: "根据技术手段推断黑客的技术背景和访问途径。" },
+                    { id: "prepare-report", name: "准备结案报告", icon: "fa-file-signature", 
+                      description: "整理所有证据和分析，形成完整的结案报告。" }
+                ],
+                branch: null,
+                minigame: "layer_puzzle"
+            },
+            {
+                id: 5,
+                title: "第五幕：安全加固设计",
+                icon: "fa-shield-alt",
+                content: `
+                    <p>案件已侦破，但你的工作还没结束。作为物联网安全专家，你需要设计一个更安全的系统，防止类似事件再次发生。</p>
+                    
+                    <p><strong>任务：</strong>设计一个"安全的回家场景模式"，当主人合法开锁（指纹/刷卡）时，系统能够自动联动客厅灯光与播放温馨音乐，同时确保系统安全。</p>
+                    
+                    <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid var(--accent-yellow);">
+                        <h4 style="color: var(--accent-yellow); margin-bottom: 10px;"><i class="fas fa-lightbulb"></i> 学习目标</h4>
+                        <p>综合应用物联网三层结构：<strong>设计安全的智能家居系统</strong></p>
+                    </div>
+                    
+                    <h3 style="margin-top: 25px; color: var(--accent-cyan);">
+                        <i class="fas fa-pencil-ruler"></i> 设计你的安全物联系统：
+                    </h3>
+                    <div style="background: var(--secondary-bg); padding: 20px; border-radius: 8px; margin-top: 15px;">
+                        <h4>回家场景模式设计框架</h4>
+                        <div style="margin-top: 15px;">
+                            <p><strong>感知层触发条件：</strong></p>
+                            <div id="perceptionDesign" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; min-height: 50px;" class="design-area">
+                                <p style="color: var(--text-secondary); font-style: italic;">请拖拽感知层设备到这里</p>
+                            </div>
+                            
+                            <p><strong>网络层传输路径：</strong></p>
+                            <div id="networkDesign" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; min-height: 50px;" class="design-area">
+                                <p style="color: var(--text-secondary); font-style: italic;">请拖拽网络层设备到这里</p>
+                            </div>
+                            
+                            <p><strong>应用层处理与执行：</strong></p>
+                            <div id="applicationDesign" style="margin: 10px 0; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 5px; min-height: 100px;" class="design-area">
+                                <p style="color: var(--text-secondary); font-style: italic;">请拖拽应用层组件到这里</p>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                evidences: [],
+                actions: [
+                    { id: "submit-design", name: "提交设计方案", icon: "fa-paper-plane", 
+                      description: "完成安全物联网系统设计并提交评估。" },
+                    { id: "test-design", name: "测试设计方案", icon: "fa-vial", 
+                      description: "模拟测试你的物联网系统设计是否存在漏洞。" },
+                    { id: "compare-solutions", name: "对比解决方案", icon: "fa-balance-scale", 
+                      description: "查看其他同学的设计方案并进行对比。" }
+                ],
+                branch: null,
+                minigame: null,
+                designElements: [
+                    { id: "fingerprint-sensor", name: "指纹传感器", layer: "perception", icon: "fa-fingerprint" },
+                    { id: "rfid-reader", name: "RFID读卡器", layer: "perception", icon: "fa-id-card" },
+                    { id: "wifi-module", name: "WiFi模块", layer: "network", icon: "fa-wifi" },
+                    { id: "bluetooth-module", name: "蓝牙模块", layer: "network", icon: "fa-bluetooth" },
+                    { id: "cloud-server", name: "云端服务器", layer: "application", icon: "fa-cloud" },
+                    { id: "local-processor", name: "本地处理器", layer: "application", icon: "fa-microchip" },
+                    { id: "light-control", name: "灯光控制器", layer: "application", icon: "fa-lightbulb" },
+                    { id: "music-player", name: "音乐播放器", layer: "application", icon: "fa-music" },
+                    { id: "permission-check", name: "权限验证模块", layer: "application", icon: "fa-user-check" },
+                    { id: "encryption-module", name: "数据加密模块", layer: "network", icon: "fa-lock" }
+                ]
+            }
+        ];
+        
+        // 成就系统
+        const achievements = {
+            "first_evidence": {
+                id: "first_evidence",
+                name: "第一滴血",
+                description: "收集第一个证据",
+                icon: "fa-folder-open",
+                rarity: "普通",
+                reward: 10,
+                hidden: false
+            },
+            "evidence_master": {
+                id: "evidence_master",
+                name: "证据大师",
+                description: "收集所有场景的20个证据",
+                icon: "fa-folder",
+                rarity: "稀有",
+                reward: 50,
+                hidden: false
+            },
+            "layer_expert": {
+                id: "layer_expert",
+                name: "层级专家",
+                description: "完全激活所有物联网三层结构",
+                icon: "fa-layer-group",
+                rarity: "稀有",
+                reward: 40,
+                hidden: false
+            },
+            "skill_pro": {
+                id: "skill_pro",
+                name: "技能达人",
+                description: "成功使用角色技能5次",
+                icon: "fa-magic",
+                rarity: "史诗",
+                reward: 60,
+                hidden: false
+            },
+            "puzzle_solver": {
+                id: "puzzle_solver",
+                name: "解谜高手",
+                description: "完成所有迷你游戏且得分超过80%",
+                icon: "fa-puzzle-piece",
+                rarity: "史诗",
+                reward: 70,
+                hidden: false
+            },
+            "speed_demon": {
+                id: "speed_demon",
+                name: "闪电侦探",
+                description: "在30分钟内完成整个案件",
+                icon: "fa-bolt",
+                rarity: "传奇",
+                reward: 100,
+                hidden: false
+            },
+            "hidden_clue_finder": {
+                id: "hidden_clue_finder",
+                name: "隐藏线索发现者",
+                description: "找到所有3个隐藏线索",
+                icon: "fa-eye",
+                rarity: "传奇",
+                reward: 80,
+                hidden: true
+            },
+            "perfect_design": {
+                id: "perfect_design",
+                name: "完美设计师",
+                description: "第五幕设计得分100分",
+                icon: "fa-award",
+                rarity: "传奇",
+                reward: 90,
+                hidden: false
+            },
+            "iot_master": {
+                id: "iot_master",
+                name: "物联网大师",
+                description: "解锁所有物联网设备图鉴",
+                icon: "fa-book",
+                rarity: "史诗",
+                reward: 75,
+                hidden: false
+            },
+            "branch_explorer": {
+                id: "branch_explorer",
+                name: "分支探索者",
+                description: "体验所有分支剧情选项",
+                icon: "fa-code-branch",
+                rarity: "稀有",
+                reward: 45,
+                hidden: false
+            },
+            "smart_trap": {
+                id: "smart_trap",
+                name: "智能陷阱",
+                description: "在第三幕成功设置蜜罐捕获黑客",
+                icon: "fa-bug",
+                rarity: "史诗",
+                reward: 65,
+                hidden: true
+            },
+            "quick_learner": {
+                id: "quick_learner",
+                name: "快速学习者",
+                description: "在前两幕就完全激活感知层和网络层",
+                icon: "fa-graduation-cap",
+                rarity: "稀有",
+                reward: 55,
+                hidden: false
+            }
+        };
+        
+        // 收集图鉴系统
+        const deviceCollection = {
+            "sensors": [
+                { id: "temp_sensor", name: "温度传感器", description: "测量环境温度", rarity: "普通", icon: "fa-thermometer-half" },
+                { id: "humidity_sensor", name: "湿度传感器", description: "测量环境湿度", rarity: "普通", icon: "fa-tint" },
+                { id: "motion_sensor", name: "运动传感器", description: "检测人体移动", rarity: "普通", icon: "fa-running" },
+                { id: "rfid_reader", name: "RFID读卡器", description: "读取射频识别卡", rarity: "稀有", icon: "fa-id-card" },
+                { id: "fingerprint_sensor", name: "指纹传感器", description: "生物识别", rarity: "稀有", icon: "fa-fingerprint" },
+                { id: "air_quality_sensor", name: "空气质量传感器", description: "检测PM2.5等", rarity: "史诗", icon: "fa-wind" },
+                { id: "camera", name: "智能摄像头", description: "视觉识别与监控", rarity: "稀有", icon: "fa-video" },
+                { id: "sound_sensor", name: "声音传感器", description: "检测环境声音", rarity: "普通", icon: "fa-volume-up" }
+            ],
+            "network": [
+                { id: "wifi_router", name: "WiFi路由器", description: "无线网络接入点", rarity: "普通", icon: "fa-wifi" },
+                { id: "bluetooth_module", name: "蓝牙模块", description: "短距离无线通信", rarity: "普通", icon: "fa-bluetooth" },
+                { id: "zigbee_gateway", name: "ZigBee网关", description: "低功耗无线网络", rarity: "稀有", icon: "fa-satellite" },
+                { id: "lora_module", name: "LoRa模块", description: "远距离低功耗", rarity: "史诗", icon: "fa-signal" },
+                { id: "5g_module", name: "5G通信模块", description: "高速移动通信", rarity: "传奇", icon: "fa-broadcast-tower" },
+                { id: "ethernet_switch", name: "以太网交换机", description: "有线网络交换", rarity: "普通", icon: "fa-network-wired" },
+                { id: "nbiot_module", name: "NB-IoT模块", description: "窄带物联网", rarity: "稀有", icon: "fa-signal" }
+            ]
+        };
+        
+        // 迷你游戏系统
+        const minigames = {
+            "packet_sorting": {
+                id: "packet_sorting",
+                name: "数据包排序挑战",
+                description: "将混乱的数据包按正确的时间顺序排列",
+                instructions: "物联网数据传输有严格的时间顺序，请将下列数据包按正确时序排列。拖拽数据包到右侧的正确位置。",
+                timeLimit: 60,
+                reward: 30,
+                packets: [
+                    { id: 1, content: "传感器采集数据", correctOrder: 1 },
+                    { id: 2, content: "数据加密处理", correctOrder: 3 },
+                    { id: 3, content: "网络传输", correctOrder: 2 },
+                    { id: 4, content: "云端接收", correctOrder: 4 },
+                    { id: 5, content: "应用层处理", correctOrder: 5 },
+                    { id: 6, content: "结果呈现", correctOrder: 6 }
+                ]
+            },
+            "protocol_matching": {
+                id: "protocol_matching",
+                name: "协议匹配大师",
+                description: "将物联网设备与正确的通信协议配对",
+                instructions: "不同物联网设备使用不同的通信协议，请正确匹配设备与协议。点击设备然后点击对应协议。",
+                reward: 25,
+                pairs: [
+                    { device: "智能手环", protocol: "蓝牙", hint: "短距离、低功耗" },
+                    { device: "智能家居中枢", protocol: "WiFi", hint: "高速、家庭网络" },
+                    { device: "共享单车", protocol: "移动网络(4G/5G)", hint: "广域覆盖" },
+                    { device: "工业传感器", protocol: "ZigBee", hint: "低功耗、网状网络" },
+                    { device: "智能电表", protocol: "LoRa", hint: "远距离、低功耗" }
+                ]
+            },
+            "layer_puzzle": {
+                id: "layer_puzzle",
+                name: "结构拼图挑战",
+                description: "将物联网组件放入正确的层级",
+                instructions: "将下方的物联网组件拖拽到正确的层级区域。每个层级有3个位置需要填充。",
+                timeLimit: 90,
+                reward: 40,
+                components: [
+                    { name: "RFID读卡器", correctLayer: "perception" },
+                    { name: "温度传感器", correctLayer: "perception" },
+                    { name: "WiFi模块", correctLayer: "network" },
+                    { name: "蓝牙芯片", correctLayer: "network" },
+                    { name: "云端服务器", correctLayer: "application" },
+                    { name: "手机APP", correctLayer: "application" },
+                    { name: "摄像头", correctLayer: "perception" },
+                    { name: "路由器", correctLayer: "network" },
+                    { name: "数据库", correctLayer: "application" }
+                ]
+            }
+        };
+        
+        // 意外事件系统
+        const randomEvents = [
+            {
+                id: "power_outage",
+                name: "突发停电",
+                triggerScene: [2, 3],
+                probability: 0.15,
+                description: "科技馆突然停电！部分物联设备离线，你需要切换到备用系统继续调查。",
+                effect: {
+                    action: "激活备用电源系统",
+                    timePenalty: 30,
+                    scoreBonus: 15
+                }
+            },
+            {
+                id: "false_alarm",
+                name: "误报警报",
+                triggerScene: [1, 4],
+                probability: 0.2,
+                description: "消防警报突然响起！这是真实的火警还是系统故障？",
+                choices: [
+                    { text: "立即疏散", result: "浪费时间，但安全第一", score: 5 },
+                    { text: "检查系统", result: "发现是黑客触发的假警报，获得线索", score: 20 },
+                    { text: "忽略继续调查", result: "冒险行为，可能错过重要线索", score: -10 }
+                ]
+            },
+            {
+                id: "hacker_taunt",
+                name: "黑客挑衅",
+                triggerScene: [3],
+                probability: 0.25,
+                description: "你的调查终端突然收到一条匿名消息：'你以为找到漏洞了吗？游戏才刚刚开始！'",
+                effect: {
+                    challenge: "黑客留下了一个加密谜题",
+                    reward: "解开谜题可获得黑客IP地址线索"
+                }
+            }
+        ];
+        
+        // 彩蛋系统
+        const easterEggs = [
+            {
+                id: "developer_room",
+                name: "开发者密室",
+                trigger: "在第五幕的设计界面连续点击物联网图标10次",
+                discovery: "发现一个隐藏的开发者测试房间，里面展示了更多物联网设备原型",
+                reward: "解锁特殊设计组件"
+            },
+            {
+                id: "time_travel",
+                name: "时光穿梭",
+                trigger: "在案件调查过程中，按顺序点击：指纹→摄像头→网络→云端",
+                discovery: "你意外激活了一个时间回溯功能，可以看到案发前24小时的加速回放",
+                reward: "获得额外的时间线线索"
+            }
+        ];
+        
+        // 班级排行榜数据（模拟）
+        const leaderboardData = [
+            { name: "李明", score: 98, role: "软件架构师", time: "32:15" },
+            { name: "王芳", score: 95, role: "数据侦探", time: "28:42" },
+            { name: "张伟", score: 92, role: "网络管理员", time: "35:20" },
+            { name: "刘洋", score: 88, role: "安防工程师", time: "40:10" },
+            { name: "陈静", score: 85, role: "传感器专家", time: "38:55" },
+            { name: "赵刚", score: 82, role: "系统分析师", time: "42:30" },
+            { name: "孙丽", score: 78, role: "安防工程师", time: "45:12" },
+            { name: "周涛", score: 75, role: "网络管理员", time: "50:05" }
+        ];
+        
+        // ================ 游戏初始化 ================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // 创建动态数据流背景
+            createDataStreams();
+            
+            // 显示角色选择模态框
+            showRoleSelection();
+            
+            // 设置事件监听器
+            setupEventListeners();
+            
+            // 初始化排行榜
+            updateLeaderboard();
+            
+            // 开始游戏计时
+            gameState.startTime = new Date();
+            updateCurrentTime();
+            setInterval(updateCurrentTime, 60000); // 每分钟更新一次时间
+            
+            // 尝试加载保存的游戏进度
+            loadGameProgress();
+        });
+        
+        // 创建动态数据流背景
+        function createDataStreams() {
+            const dataStream = document.getElementById("dataStream");
+            for (let i = 0; i < 25; i++) {
+                const streamLine = document.createElement("div");
+                streamLine.className = "stream-line";
+                streamLine.style.left = `${Math.random() * 100}%`;
+                streamLine.style.animationDelay = `${Math.random() * 15}s`;
+                dataStream.appendChild(streamLine);
+            }
+        }
+        
+        // 显示角色选择模态框
+        function showRoleSelection() {
+            const modal = document.getElementById("roleSelectionModal");
+            const grid = document.getElementById("roleSelectionGrid");
+            
+            grid.innerHTML = "";
+            
+            // 生成角色选择卡片
+            for (const roleId in roles) {
+                const role = roles[roleId];
+                const roleCard = document.createElement("div");
+                roleCard.className = "choice-option";
+                roleCard.style.border = `2px solid ${role.color}`;
+                roleCard.style.cursor = "pointer";
+                
+                roleCard.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 15px; 
+                             display: flex; align-items: center; justify-content: center; font-size: 2rem;
+                             background: linear-gradient(135deg, ${role.color}, ${role.color}99);
+                             border: 3px solid ${role.color};">
+                            <i class="fas ${role.icon}"></i>
+                        </div>
+                        <h3 style="color: ${role.color}; margin-bottom: 10px;">${role.name}</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 15px;">
+                            ${role.description}
+                        </p>
+                        <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; margin-top: 10px;">
+                            <h4 style="color: var(--accent-cyan); font-size: 0.9rem; margin-bottom: 5px;">
+                                <i class="fas ${role.skill.icon}"></i> ${role.skill.name}
+                            </h4>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">
+                                ${role.skill.description}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                roleCard.addEventListener("click", () => selectRole(roleId));
+                grid.appendChild(roleCard);
+            }
+            
+            modal.classList.add("active");
+        }
+        
+        // 选择角色
+        function selectRole(roleId) {
+            const role = roles[roleId];
+            gameState.playerRole = roleId;
+            
+            // 更新角色显示
+            document.getElementById("roleName").textContent = role.name;
+            document.getElementById("roleDescription").textContent = role.description;
+            document.getElementById("roleAvatar").innerHTML = `<i class="fas ${role.icon}"></i>`;
+            document.getElementById("roleAvatar").style.background = `linear-gradient(135deg, ${role.color}, ${role.color}99)`;
+            
+            // 更新技能显示
+            document.getElementById("skillName").textContent = role.skill.name;
+            document.getElementById("skillDescription").textContent = role.skill.description;
+            document.getElementById("skillIcon").innerHTML = `<i class="fas ${role.skill.icon}"></i>`;
+            
+            // 更新场景中的动态角色名称
+            const dynamicRoleName = document.getElementById("dynamicRoleName");
+            if (dynamicRoleName) {
+                dynamicRoleName.textContent = role.name;
+            }
+            
+            // 关闭角色选择模态框
+            document.getElementById("closeRoleModal").click();
+            
+            // 播放音效
+            playSound("click");
+            
+            // 显示欢迎消息
+            showToast(`欢迎，${role.name}！你的技能"${role.skill.name}"已准备就绪。`, "info");
+            
+            // 更新场景
+            updateScene();
+            
+            // 解锁第一个成就
+            unlockAchievement("quick_learner");
+        }
+        
+        // 更新场景
+        function updateScene() {
+            const scene = scenes[gameState.currentScene - 1];
+            
+            // 更新场景标题和内容
+            document.getElementById("sceneTitle").innerHTML = `<i class="fas ${scene.icon}"></i> ${scene.title}`;
+            
+            // 动态替换角色名称
+            let sceneContent = scene.content;
+            if (gameState.playerRole) {
+                const role = roles[gameState.playerRole];
+                sceneContent = scene.content.replace('id="dynamicRoleName">专家', `id="dynamicRoleName">${role.name}`);
+            }
+            
+            document.getElementById("sceneContent").innerHTML = sceneContent;
+            
+            // 清空容器
+            document.getElementById("evidenceGridContainer").innerHTML = "";
+            document.getElementById("iotLayersContainer").innerHTML = "";
+            document.getElementById("branchChoicesContainer").innerHTML = "";
+            document.getElementById("minigameContainer").innerHTML = "";
+            document.getElementById("actionButtonsContainer").innerHTML = "";
+            
+            // 更新证据网格
+            updateEvidenceGrid(scene.evidences);
+            
+            // 更新物联网三层结构可视化
+            updateIotLayers();
+            
+            // 更新行动按钮
+            updateActionButtons(scene.actions);
+            
+            // 如果有分支选择，显示分支
+            if (scene.branch && !gameState.branchChoices[scene.branch.id]) {
+                showBranchChoices(scene.branch);
+            }
+            
+            // 如果有迷你游戏，显示迷你游戏入口
+            if (scene.minigame && !gameState.minigameScores[scene.minigame]) {
+                showMinigameEntry(scene.minigame);
+            }
+            
+            // 更新设计元素（第五幕）
+            if (gameState.currentScene === 5) {
+                setTimeout(() => {
+                    addDesignElements();
+                }, 100);
+            }
+            
+            // 更新导航按钮状态
+            updateNavigationButtons();
+            
+            // 更新进度显示
+            updateProgressDisplay();
+            
+            // 检查是否触发意外事件
+            checkRandomEvent();
+            
+            // 添加日志记录
+            addLogEntry(`进入${scene.title}`);
+            
+            // 更新技能冷却显示
+            updateSkillCooldownDisplay();
+        }
+        
+        // 更新证据网格
+        function updateEvidenceGrid(evidences) {
+            const container = document.getElementById("evidenceGridContainer");
+            if (!container) return;
+            
+            if (evidences.length === 0) {
+                container.style.display = "none";
+                return;
+            }
+            
+            container.style.display = "block";
+            container.innerHTML = `
+                <h3 style="margin-top: 25px; color: var(--accent-cyan);">
+                    <i class="fas fa-search"></i> 证据收集：
+                </h3>
+                <div class="evidence-grid" id="evidenceGrid"></div>
+            `;
+            
+            const evidenceGrid = document.getElementById("evidenceGrid");
+            
+            evidences.forEach(evidence => {
+                const isCollected = gameState.collectedEvidence.includes(evidence.id);
+                
+                const evidenceItem = document.createElement("div");
+                evidenceItem.className = `evidence-item ${isCollected ? "collected" : ""}`;
+                evidenceItem.dataset.id = evidence.id;
+                evidenceItem.dataset.layer = evidence.layer;
+                
+                evidenceItem.innerHTML = `
+                    <div class="evidence-icon">
+                        <i class="fas ${evidence.icon}"></i>
+                    </div>
+                    <h4>${evidence.name}</h4>
+                    ${isCollected ? '<p><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> 已收集</p>' : ''}
+                `;
+                
+                evidenceItem.addEventListener("click", () => showEvidenceDetails(evidence));
+                evidenceGrid.appendChild(evidenceItem);
+            });
+        }
+        
+        // 更新物联网三层结构可视化
+        function updateIotLayers() {
+            const container = document.getElementById("iotLayersContainer");
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="iot-layers" id="iotLayers">
+                    <div class="layer perception">
+                        <div class="layer-header">
+                            <h3><i class="fas fa-eye"></i> 感知层</h3>
+                            <span class="layer-status">${gameState.analyzedLayers.perception ? "已激活" : "待激活"}</span>
+                        </div>
+                        <p>负责从物理世界采集数据</p>
+                        <div class="layer-devices" id="perceptionDevices"></div>
+                    </div>
+                    
+                    <div class="layer network">
+                        <div class="layer-header">
+                            <h3><i class="fas fa-network-wired"></i> 网络层</h3>
+                            <span class="layer-status">${gameState.analyzedLayers.network ? "已激活" : "待激活"}</span>
+                        </div>
+                        <p>负责数据传输</p>
+                        <div class="layer-devices" id="networkDevices"></div>
+                    </div>
+                    
+                    <div class="layer application">
+                        <div class="layer-header">
+                            <h3><i class="fas fa-brain"></i> 应用层</h3>
+                            <span class="layer-status">${gameState.analyzedLayers.application ? "已激活" : "待激活"}</span>
+                        </div>
+                        <p>负责数据处理与呈现</p>
+                        <div class="layer-devices" id="applicationDevices"></div>
+                    </div>
+                </div>
+            `;
+            
+            // 更新感知层设备
+            const perceptionDevices = document.getElementById("perceptionDevices");
+            if (perceptionDevices && (gameState.currentScene >= 2 || gameState.analyzedLayers.perception)) {
+                const devices = ["RFID读卡器", "摄像头", "指纹传感器", "门磁传感器", "温湿度传感器"];
+                devices.forEach(device => {
+                    const tag = document.createElement("span");
+                    tag.className = "device-tag";
+                    tag.textContent = device;
+                    perceptionDevices.appendChild(tag);
+                });
+            }
+            
+            // 更新网络层设备
+            const networkDevices = document.getElementById("networkDevices");
+            if (networkDevices && (gameState.currentScene >= 3 || gameState.analyzedLayers.network)) {
+                const devices = ["WiFi路由器", "蓝牙模块", "移动网络", "ZigBee网关"];
+                devices.forEach(device => {
+                    const tag = document.createElement("span");
+                    tag.className = "device-tag";
+                    tag.textContent = device;
+                    networkDevices.appendChild(tag);
+                });
+            }
+            
+            // 更新应用层设备
+            const applicationDevices = document.getElementById("applicationDevices");
+            if (applicationDevices && (gameState.currentScene >= 4 || gameState.analyzedLayers.application)) {
+                const devices = ["云端服务器", "管理软件", "手机APP", "数据分析模块"];
+                devices.forEach(device => {
+                    const tag = document.createElement("span");
+                    tag.className = "device-tag";
+                    tag.textContent = device;
+                    applicationDevices.appendChild(tag);
+                });
+            }
+        }
+        
+        // 更新行动按钮
+        function updateActionButtons(actions) {
+            const container = document.getElementById("actionButtonsContainer");
+            if (!container) return;
+            
+            container.style.display = "flex";
+            container.innerHTML = "";
+            
+            actions.forEach(action => {
+                const button = document.createElement("button");
+                button.className = "btn btn-secondary";
+                button.innerHTML = `<i class="fas ${action.icon}"></i> ${action.name}`;
+                button.dataset.id = action.id;
+                
+                button.addEventListener("click", () => performAction(action));
+                container.appendChild(button);
+            });
+        }
+        
+        // 显示分支选择
+        function showBranchChoices(branch) {
+            const container = document.getElementById("branchChoicesContainer");
+            if (!container) return;
+            
+            container.innerHTML = `
+                <div class="minigame-container">
+                    <h3 class="minigame-title"><i class="fas fa-code-branch"></i> 关键决策点</h3>
+                    <p class="minigame-instructions">${branch.question}</p>
+                    <div class="branch-choices" id="branchChoices"></div>
+                </div>
+            `;
+            
+            const choicesContainer = document.getElementById("branchChoices");
+            
+            branch.options.forEach((option, index) => {
+                const choiceOption = document.createElement("div");
+                choiceOption.className = "choice-option";
+                choiceOption.innerHTML = `
+                    <div class="choice-icon">
+                        <i class="fas fa-${index === 0 ? 'user' : index === 1 ? 'user-ninja' : 'users'}"></i>
+                    </div>
+                    <h4 style="color: var(--accent-cyan); margin-bottom: 10px;">${option.text}</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">${option.result}</p>
+                `;
+                
+                choiceOption.addEventListener("click", () => selectBranchOption(branch.id, option));
+                choicesContainer.appendChild(choiceOption);
+            });
+        }
+        
+        // 选择分支选项
+        function selectBranchOption(branchId, option) {
+            // 记录选择
+            gameState.branchChoices[branchId] = option;
+            
+            // 增加分数
+            gameState.score += option.score;
+            updateTotalScore();
+            
+            // 处理效果
+            if (option.effect) {
+                processEffect(option.effect);
+            }
+            
+            // 隐藏分支选择
+            document.getElementById("branchChoicesContainer").innerHTML = "";
+            
+            // 显示结果
+            showToast(`你选择了：${option.text}。${option.result}`, "info");
+            
+            // 解锁分支探索成就
+            unlockAchievement("branch_explorer");
+            
+            // 添加日志
+            addLogEntry(`在分支选择中：${option.text}`);
+        }
+        
+        // 显示迷你游戏入口
+        function showMinigameEntry(minigameId) {
+            const container = document.getElementById("minigameContainer");
+            if (!container) return;
+            
+            const minigame = minigames[minigameId];
+            
+            container.innerHTML = `
+                <div class="minigame-container">
+                    <h3 class="minigame-title"><i class="fas fa-gamepad"></i> ${minigame.name}</h3>
+                    <p class="minigame-instructions">${minigame.description}</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 20px;">${minigame.instructions}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--accent-yellow);">
+                            <i class="fas fa-star"></i> 奖励: ${minigame.reward}分
+                            ${minigame.timeLimit ? `<br><i class="fas fa-clock"></i> 时间限制: ${minigame.timeLimit}秒` : ''}
+                        </span>
+                        <button class="btn btn-warning" id="startMinigameBtn">
+                            <i class="fas fa-play"></i> 开始游戏
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById("startMinigameBtn").addEventListener("click", () => startMinigame(minigameId));
+        }
+        
+        // 开始迷你游戏
+        function startMinigame(minigameId) {
+            const minigame = minigames[minigameId];
+            const modal = document.getElementById("minigameModal");
+            const content = document.getElementById("minigameContent");
+            
+            // 根据游戏类型生成内容
+            if (minigameId === "packet_sorting") {
+                content.innerHTML = createPacketSortingGame(minigame);
+            } else if (minigameId === "protocol_matching") {
+                content.innerHTML = createProtocolMatchingGame(minigame);
+            } else if (minigameId === "layer_puzzle") {
+                content.innerHTML = createLayerPuzzleGame(minigame);
+            }
+            
+            modal.classList.add("active");
+            
+            // 如果有时间限制，启动计时器
+            if (minigame.timeLimit) {
+                startMinigameTimer(minigame.timeLimit);
+            }
+        }
+        
+        // 创建数据包排序游戏
+        function createPacketSortingGame(minigame) {
+            // 打乱数据包顺序
+            const shuffledPackets = [...minigame.packets].sort(() => Math.random() - 0.5);
+            
+            return `
+                <h2 style="color: var(--accent-cyan); margin-bottom: 20px; text-align: center;">
+                    <i class="fas fa-sort-amount-down"></i> ${minigame.name}
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 25px; text-align: center;">
+                    ${minigame.instructions}
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="color: var(--accent-blue); margin-bottom: 15px;">待排序数据包</h3>
+                        <div id="packetSource" style="display: flex; flex-direction: column; gap: 10px;">
+                            ${shuffledPackets.map(packet => `
+                                <div class="packet-item" data-id="${packet.id}" 
+                                     style="background: rgba(0,212,255,0.1); padding: 15px; border-radius: 8px; 
+                                            border: 2px solid var(--accent-blue); cursor: grab;"
+                                     draggable="true">
+                                    <i class="fas fa-arrows-alt" style="margin-right: 10px; color: var(--accent-blue);"></i>
+                                    ${packet.content}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: var(--accent-green); margin-bottom: 15px;">正确顺序</h3>
+                        <div id="packetTarget" style="display: flex; flex-direction: column; gap: 10px;">
+                            ${minigame.packets.map((_, index) => `
+                                <div class="packet-slot" data-order="${index + 1}"
+                                     style="background: rgba(76,175,80,0.1); padding: 15px; border-radius: 8px; 
+                                            border: 2px dashed var(--accent-green); min-height: 60px;">
+                                    <span style="color: var(--text-secondary);">位置 ${index + 1}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                    <button class="btn btn-primary" id="checkPacketOrderBtn">
+                        <i class="fas fa-check"></i> 检查排序
+                    </button>
+                    <button class="btn btn-secondary" id="resetPacketGameBtn">
+                        <i class="fas fa-redo"></i> 重新开始
+                    </button>
+                </div>
+                
+                <div id="packetGameResult" style="margin-top: 20px; display: none;"></div>
+            `;
+        }
+        
+        // 创建协议匹配游戏
+        function createProtocolMatchingGame(minigame) {
+            // 打乱设备顺序
+            const shuffledDevices = [...minigame.pairs].sort(() => Math.random() - 0.5);
+            const shuffledProtocols = minigame.pairs.map(p => p.protocol).sort(() => Math.random() - 0.5);
+            
+            return `
+                <h2 style="color: var(--accent-cyan); margin-bottom: 20px; text-align: center;">
+                    <i class="fas fa-link"></i> ${minigame.name}
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 25px; text-align: center;">
+                    ${minigame.instructions}
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="color: var(--accent-blue); margin-bottom: 15px;">物联网设备</h3>
+                        <div id="deviceList" style="display: flex; flex-direction: column; gap: 10px;">
+                            ${shuffledDevices.map(device => `
+                                <div class="device-item" data-device="${device.device}" 
+                                     style="background: rgba(0,212,255,0.1); padding: 15px; border-radius: 8px; 
+                                            border: 2px solid var(--accent-blue); cursor: pointer; text-align: center;"
+                                     onclick="selectDevice(this, '${device.protocol}')">
+                                    <i class="fas fa-mobile-alt" style="margin-right: 10px; color: var(--accent-blue);"></i>
+                                    ${device.device}
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">
+                                        <i class="fas fa-info-circle"></i> ${device.hint}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: var(--accent-cyan); margin-bottom: 15px;">通信协议</h3>
+                        <div id="protocolList" style="display: flex; flex-direction: column; gap: 10px;">
+                            ${shuffledProtocols.map(protocol => `
+                                <div class="protocol-item" data-protocol="${protocol}"
+                                     style="background: rgba(15,240,252,0.1); padding: 15px; border-radius: 8px; 
+                                            border: 2px solid var(--accent-cyan); cursor: pointer; text-align: center;"
+                                     onclick="selectProtocol(this, '${protocol}')">
+                                    <i class="fas fa-broadcast-tower" style="margin-right: 10px; color: var(--accent-cyan);"></i>
+                                    ${protocol}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <h4 style="color: var(--accent-yellow); margin-bottom: 10px;">匹配结果</h4>
+                    <div id="matchResults" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                        <!-- 匹配结果将动态显示 -->
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                    <button class="btn btn-primary" id="checkMatchingGameBtn">
+                        <i class="fas fa-check"></i> 检查匹配
+                    </button>
+                    <button class="btn btn-secondary" id="resetMatchingGameBtn">
+                        <i class="fas fa-redo"></i> 重新开始
+                    </button>
+                </div>
+                
+                <div id="matchingGameResult" style="margin-top: 20px; display: none;"></div>
+            `;
+        }
+        
+        // 创建层级拼图游戏
+        function createLayerPuzzleGame(minigame) {
+            // 打乱组件顺序
+            const shuffledComponents = [...minigame.components].sort(() => Math.random() - 0.5);
+            
+            return `
+                <h2 style="color: var(--accent-cyan); margin-bottom: 20px; text-align: center;">
+                    <i class="fas fa-puzzle-piece"></i> ${minigame.name}
+                </h2>
+                <p style="color: var(--text-secondary); margin-bottom: 25px; text-align: center;">
+                    ${minigame.instructions}
+                </p>
+                
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px;">
+                    <div>
+                        <h3 style="color: var(--accent-blue); margin-bottom: 15px;">物联网层级</h3>
+                        <div style="display: flex; flex-direction: column; gap: 20px;">
+                            <div class="layer perception" style="padding: 20px; min-height: 120px;" 
+                                 ondrop="dropComponent(event)" ondragover="allowDrop(event)">
+                                <h4><i class="fas fa-eye"></i> 感知层</h4>
+                                <div id="perceptionPuzzle" class="puzzle-slot" 
+                                     style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; min-height: 60px;">
+                                    <!-- 拖拽到这里 -->
+                                </div>
+                            </div>
+                            
+                            <div class="layer network" style="padding: 20px; min-height: 120px;"
+                                 ondrop="dropComponent(event)" ondragover="allowDrop(event)">
+                                <h4><i class="fas fa-network-wired"></i> 网络层</h4>
+                                <div id="networkPuzzle" class="puzzle-slot"
+                                     style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; min-height: 60px;">
+                                    <!-- 拖拽到这里 -->
+                                </div>
+                            </div>
+                            
+                            <div class="layer application" style="padding: 20px; min-height: 120px;"
+                                 ondrop="dropComponent(event)" ondragover="allowDrop(event)">
+                                <h4><i class="fas fa-brain"></i> 应用层</h4>
+                                <div id="applicationPuzzle" class="puzzle-slot"
+                                     style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; min-height: 60px;">
+                                    <!-- 拖拽到这里 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: var(--accent-yellow); margin-bottom: 15px;">可拖拽组件</h3>
+                        <div id="puzzleComponents" style="display: flex; flex-direction: column; gap: 10px;">
+                            ${shuffledComponents.map(component => `
+                                <div class="puzzle-component" draggable="true" ondragstart="dragComponent(event)"
+                                     data-name="${component.name}" data-layer="${component.correctLayer}"
+                                     style="background: rgba(255,215,0,0.1); padding: 12px; border-radius: 6px; 
+                                            border: 2px solid var(--accent-yellow); cursor: grab; text-align: center;">
+                                    <i class="fas fa-arrows-alt" style="margin-right: 8px; color: var(--accent-yellow);"></i>
+                                    ${component.name}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 15px; margin-top: 30px;">
+                    <button class="btn btn-primary" id="checkPuzzleGameBtn">
+                        <i class="fas fa-check"></i> 检查拼图
+                    </button>
+                    <button class="btn btn-secondary" id="resetPuzzleGameBtn">
+                        <i class="fas fa-redo"></i> 重新开始
+                    </button>
+                </div>
+                
+                <div id="puzzleGameResult" style="margin-top: 20px; display: none;"></div>
+            `;
+        }
+        
+        // 开始迷你游戏计时器
+        function startMinigameTimer(seconds) {
+            const timerContainer = document.getElementById("timerContainer");
+            const timerElement = document.getElementById("gameTimer");
+            
+            timerContainer.style.display = "flex";
+            timerElement.textContent = seconds;
+            
+            const timerInterval = setInterval(() => {
+                seconds--;
+                timerElement.textContent = seconds;
+                
+                if (seconds <= 10) {
+                    timerElement.style.color = "var(--accent-red)";
+                    timerElement.style.animation = "pulse 1s infinite";
+                }
+                
+                if (seconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerContainer.style.display = "none";
+                    
+                    // 时间到，自动检查答案
+                    const checkBtn = document.querySelector("#checkPacketOrderBtn, #checkMatchingGameBtn, #checkPuzzleGameBtn");
+                    if (checkBtn) checkBtn.click();
+                }
+            }, 1000);
+        }
+        
+        // 检查数据包排序游戏
+        window.checkPacketOrder = function() {
+            const slots = document.querySelectorAll(".packet-slot");
+            let correct = 0;
+            let total = 0;
+            
+            slots.forEach(slot => {
+                const packet = slot.querySelector(".packet-item");
+                if (packet) {
+                    total++;
+                    const packetId = parseInt(packet.dataset.id);
+                    const correctOrder = parseInt(slot.dataset.order);
+                    
+                    // 查找正确的数据包ID
+                    const minigame = minigames["packet_sorting"];
+                    const correctPacket = minigame.packets.find(p => p.correctOrder === correctOrder);
+                    
+                    if (correctPacket && packetId === correctPacket.id) {
+                        correct++;
+                        slot.style.borderColor = "var(--accent-green)";
+                        slot.style.backgroundColor = "rgba(76,175,80,0.2)";
+                    } else {
+                        slot.style.borderColor = "var(--accent-red)";
+                        slot.style.backgroundColor = "rgba(255,55,95,0.2)";
+                    }
+                }
+            });
+            
+            const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+            const resultElement = document.getElementById("packetGameResult");
+            
+            let reward = 0;
+            if (percentage === 100) {
+                reward = minigames["packet_sorting"].reward;
+                resultElement.innerHTML = `
+                    <div style="background: rgba(76,175,80,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-green); text-align: center;">
+                        <h4 style="color: var(--accent-green);"><i class="fas fa-check-circle"></i> 完美！</h4>
+                        <p>你正确排序了所有数据包！物联网工作过程完全正确。</p>
+                        <p>获得奖励: <strong>${reward}分</strong></p>
+                    </div>
+                `;
+            } else if (percentage >= 80) {
+                reward = Math.round(minigames["packet_sorting"].reward * 0.8);
+                resultElement.innerHTML = `
+                    <div style="background: rgba(255,215,0,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-yellow); text-align: center;">
+                        <h4 style="color: var(--accent-yellow);"><i class="fas fa-check-circle"></i> 良好！</h4>
+                        <p>你正确排序了 ${correct}/${total} 个数据包 (${percentage}%)。</p>
+                        <p>获得奖励: <strong>${reward}分</strong></p>
+                    </div>
+                `;
+            } else {
+                resultElement.innerHTML = `
+                    <div style="background: rgba(255,55,95,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-red); text-align: center;">
+                        <h4 style="color: var(--accent-red);"><i class="fas fa-exclamation-circle"></i> 需要改进</h4>
+                        <p>你正确排序了 ${correct}/${total} 个数据包 (${percentage}%)。</p>
+                        <p>物联网工作过程是: 感知 → 传输 → 处理 → 呈现</p>
+                    </div>
+                `;
+            }
+            
+            resultElement.style.display = "block";
+            
+            // 记录游戏得分
+            if (reward > 0) {
+                gameState.minigameScores["packet_sorting"] = percentage;
+                gameState.score += reward;
+                updateTotalScore();
+                
+                // 关闭迷你游戏模态框
+                setTimeout(() => {
+                    document.getElementById("closeMinigameModal").click();
+                    showToast(`迷你游戏完成！获得${reward}分。`, "success");
+                    
+                    // 更新迷你游戏容器
+                    document.getElementById("minigameContainer").innerHTML = `
+                        <div class="minigame-container">
+                            <h3 class="minigame-title"><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> 已完成</h3>
+                            <p style="color: var(--text-secondary);">数据包排序游戏完成，正确率: ${percentage}%</p>
+                        </div>
+                    `;
+                    
+                    // 解锁成就
+                    if (percentage >= 80) {
+                        unlockAchievement("puzzle_solver");
+                    }
+                }, 2000);
+            }
+        };
+        
+        // 选择设备（协议匹配游戏）
+        window.selectDevice = function(element, correctProtocol) {
+            element.classList.add("selected");
+            element.dataset.correctProtocol = correctProtocol;
+        };
+        
+        // 选择协议（协议匹配游戏）
+        window.selectProtocol = function(element, protocol) {
+            // 查找选中的设备
+            const selectedDevice = document.querySelector(".device-item.selected");
+            if (!selectedDevice) {
+                showToast("请先选择一个设备", "warning");
+                return;
+            }
+            
+            const correctProtocol = selectedDevice.dataset.correctProtocol;
+            const matchResults = document.getElementById("matchResults");
+            
+            if (protocol === correctProtocol) {
+                // 匹配正确
+                matchResults.innerHTML += `
+                    <div style="background: rgba(76,175,80,0.2); padding: 10px; border-radius: 6px; border: 2px solid var(--accent-green); text-align: center;">
+                        <i class="fas fa-check" style="color: var(--accent-green);"></i>
+                        <div>${selectedDevice.textContent.split('\n')[0]}</div>
+                        <div>→ ${protocol}</div>
+                    </div>
+                `;
+                
+                selectedDevice.style.borderColor = "var(--accent-green)";
+                selectedDevice.style.backgroundColor = "rgba(76,175,80,0.2)";
+                selectedDevice.classList.remove("selected");
+                
+                element.style.borderColor = "var(--accent-green)";
+                element.style.backgroundColor = "rgba(76,175,80,0.2)";
+                element.style.pointerEvents = "none";
+                
+                playSound("success");
+            } else {
+                // 匹配错误
+                showToast("匹配错误！再试试看。", "error");
+                selectedDevice.classList.remove("selected");
+                playSound("error");
+            }
+            
+            // 检查是否所有匹配完成
+            checkMatchingCompletion();
+        };
+        
+        // 检查协议匹配完成情况
+        function checkMatchingCompletion() {
+            const deviceItems = document.querySelectorAll(".device-item");
+            const matchedDevices = document.querySelectorAll('.device-item[style*="border-color: var(--accent-green)"]');
+            
+            if (matchedDevices.length === deviceItems.length) {
+                // 所有设备都匹配完成
+                setTimeout(() => {
+                    finishMatchingGame();
+                }, 1000);
+            }
+        }
+        
+        // 完成协议匹配游戏
+        function finishMatchingGame() {
+            const reward = minigames["protocol_matching"].reward;
+            gameState.minigameScores["protocol_matching"] = 100;
+            gameState.score += reward;
+            updateTotalScore();
+            
+            const resultElement = document.getElementById("matchingGameResult");
+            resultElement.innerHTML = `
+                <div style="background: rgba(76,175,80,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-green); text-align: center;">
+                    <h4 style="color: var(--accent-green);"><i class="fas fa-check-circle"></i> 完美匹配！</h4>
+                    <p>你正确匹配了所有物联网设备与通信协议！</p>
+                    <p>获得奖励: <strong>${reward}分</strong></p>
+                </div>
+            `;
+            resultElement.style.display = "block";
+            
+            // 关闭迷你游戏模态框
+            setTimeout(() => {
+                document.getElementById("closeMinigameModal").click();
+                showToast(`协议匹配完成！获得${reward}分。`, "success");
+                
+                // 更新迷你游戏容器
+                document.getElementById("minigameContainer").innerHTML = `
+                    <div class="minigame-container">
+                        <h3 class="minigame-title"><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> 已完成</h3>
+                        <p style="color: var(--text-secondary);">协议匹配游戏完成，正确率: 100%</p>
+                    </div>
+                `;
+                
+                // 解锁成就
+                unlockAchievement("puzzle_solver");
+            }, 2000);
+        }
+        
+        // 拖拽组件（层级拼图游戏）
+        window.dragComponent = function(event) {
+            event.dataTransfer.setData("text/plain", event.target.dataset.name + "|" + event.target.dataset.layer);
+        };
+        
+        // 允许放置
+        window.allowDrop = function(event) {
+            event.preventDefault();
+        };
+        
+        // 放置组件
+        window.dropComponent = function(event) {
+            event.preventDefault();
+            const data = event.dataTransfer.getData("text/plain").split("|");
+            const componentName = data[0];
+            const componentLayer = data[1];
+            
+            const targetLayer = event.currentTarget.classList.contains("perception") ? "perception" :
+                               event.currentTarget.classList.contains("network") ? "network" : "application";
+            
+            if (componentLayer === targetLayer) {
+                // 放置到正确层级
+                const componentDiv = document.createElement("div");
+                componentDiv.className = "puzzle-component";
+                componentDiv.textContent = componentName;
+                componentDiv.style.margin = "5px";
+                componentDiv.style.padding = "8px";
+                componentDiv.style.background = "rgba(76,175,80,0.2)";
+                componentDiv.style.border = "2px solid var(--accent-green)";
+                componentDiv.style.borderRadius = "6px";
+                
+                event.currentTarget.querySelector(".puzzle-slot").appendChild(componentDiv);
+                
+                // 从源列表中移除
+                const sourceElement = document.querySelector(`.puzzle-component[data-name="${componentName}"]`);
+                if (sourceElement) {
+                    sourceElement.style.display = "none";
+                }
+                
+                playSound("success");
+            } else {
+                // 放置到错误层级
+                showToast(`错误！${componentName}属于${getLayerName(componentLayer)}，不能放在${getLayerName(targetLayer)}`, "error");
+                playSound("error");
+            }
+            
+            // 检查拼图完成情况
+            checkPuzzleCompletion();
+        };
+        
+        // 检查拼图完成情况
+        function checkPuzzleCompletion() {
+            const placedComponents = document.querySelectorAll(".puzzle-slot .puzzle-component");
+            const totalComponents = minigames["layer_puzzle"].components.length;
+            
+            if (placedComponents.length === totalComponents) {
+                // 所有组件都放置完成
+                setTimeout(() => {
+                    finishPuzzleGame();
+                }, 1000);
+            }
+        }
+        
+        // 完成拼图游戏
+        function finishPuzzleGame() {
+            // 检查每个层级是否正确
+            const perceptionComponents = document.querySelectorAll("#perceptionPuzzle .puzzle-component");
+            const networkComponents = document.querySelectorAll("#networkPuzzle .puzzle-component");
+            const applicationComponents = document.querySelectorAll("#applicationPuzzle .puzzle-component");
+            
+            let correctCount = 0;
+            let totalCount = 0;
+            
+            // 检查感知层
+            perceptionComponents.forEach(comp => {
+                totalCount++;
+                const componentName = comp.textContent;
+                const correctComponent = minigames["layer_puzzle"].components.find(c => c.name === componentName);
+                if (correctComponent && correctComponent.correctLayer === "perception") {
+                    correctCount++;
+                }
+            });
+            
+            // 检查网络层
+            networkComponents.forEach(comp => {
+                totalCount++;
+                const componentName = comp.textContent;
+                const correctComponent = minigames["layer_puzzle"].components.find(c => c.name === componentName);
+                if (correctComponent && correctComponent.correctLayer === "network") {
+                    correctCount++;
+                }
+            });
+            
+            // 检查应用层
+            applicationComponents.forEach(comp => {
+                totalCount++;
+                const componentName = comp.textContent;
+                const correctComponent = minigames["layer_puzzle"].components.find(c => c.name === componentName);
+                if (correctComponent && correctComponent.correctLayer === "application") {
+                    correctCount++;
+                }
+            });
+            
+            const percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+            let reward = 0;
+            
+            if (percentage === 100) {
+                reward = minigames["layer_puzzle"].reward;
+            } else if (percentage >= 80) {
+                reward = Math.round(minigames["layer_puzzle"].reward * 0.8);
+            }
+            
+            const resultElement = document.getElementById("puzzleGameResult");
+            
+            if (percentage === 100) {
+                resultElement.innerHTML = `
+                    <div style="background: rgba(76,175,80,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-green); text-align: center;">
+                        <h4 style="color: var(--accent-green);"><i class="fas fa-check-circle"></i> 完美！</h4>
+                        <p>你正确放置了所有物联网组件！三层结构完全正确。</p>
+                        <p>获得奖励: <strong>${reward}分</strong></p>
+                    </div>
+                `;
+            } else if (percentage >= 80) {
+                resultElement.innerHTML = `
+                    <div style="background: rgba(255,215,0,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-yellow); text-align: center;">
+                        <h4 style="color: var(--accent-yellow);"><i class="fas fa-check-circle"></i> 良好！</h4>
+                        <p>你正确放置了 ${correctCount}/${totalCount} 个组件 (${percentage}%)。</p>
+                        <p>获得奖励: <strong>${reward}分</strong></p>
+                    </div>
+                `;
+            } else {
+                resultElement.innerHTML = `
+                    <div style="background: rgba(255,55,95,0.2); padding: 15px; border-radius: 8px; border: 2px solid var(--accent-red); text-align: center;">
+                        <h4 style="color: var(--accent-red);"><i class="fas fa-exclamation-circle"></i> 需要改进</h4>
+                        <p>你正确放置了 ${correctCount}/${totalCount} 个组件 (${percentage}%)。</p>
+                        <p>回忆一下：感知层采集数据，网络层传输数据，应用层处理数据</p>
+                    </div>
+                `;
+            }
+            
+            resultElement.style.display = "block";
+            
+            // 记录游戏得分
+            if (reward > 0) {
+                gameState.minigameScores["layer_puzzle"] = percentage;
+                gameState.score += reward;
+                updateTotalScore();
+                
+                // 关闭迷你游戏模态框
+                setTimeout(() => {
+                    document.getElementById("closeMinigameModal").click();
+                    showToast(`层级拼图完成！获得${reward}分。`, "success");
+                    
+                    // 更新迷你游戏容器
+                    document.getElementById("minigameContainer").innerHTML = `
+                        <div class="minigame-container">
+                            <h3 class="minigame-title"><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> 已完成</h3>
+                            <p style="color: var(--text-secondary);">层级拼图游戏完成，正确率: ${percentage}%</p>
+                        </div>
+                    `;
+                    
+                    // 解锁成就
+                    if (percentage >= 80) {
+                        unlockAchievement("puzzle_solver");
+                    }
+                }, 2000);
+            }
+        };
+        
+        // 显示证据详情
+        function showEvidenceDetails(evidence) {
+            // 创建模态框
+            const modal = document.createElement("div");
+            modal.className = "modal active";
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    <h2 style="color: var(--accent-blue); margin-bottom: 20px;">
+                        <i class="fas ${evidence.icon}"></i> ${evidence.name}
+                    </h2>
+                    <p style="line-height: 1.7; margin-bottom: 20px;">${evidence.description}</p>
+                    <p><strong>所属层级：</strong> ${getLayerName(evidence.layer)}</p>
+                    <p><strong>发现时间：</strong> 案发当晚 23:45</p>
+                    
+                    ${evidence.layer === "perception" ? 
+                        '<div style="background: rgba(0,212,255,0.1); padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid var(--accent-blue);">' +
+                        '<p><i class="fas fa-lightbulb"></i> <strong>提示：</strong>感知层设备就像系统的"感官"，负责采集原始数据。</p></div>' : 
+                    evidence.layer === "network" ? 
+                        '<div style="background: rgba(15,240,252,0.1); padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid var(--accent-cyan);">' +
+                        '<p><i class="fas fa-lightbulb"></i> <strong>提示：</strong>网络层设备就像系统的"神经网络"，负责数据传输。</p></div>' : 
+                    evidence.layer === "application" ? 
+                        '<div style="background: rgba(255,55,95,0.1); padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid var(--accent-red);">' +
+                        '<p><i class="fas fa-lightbulb"></i> <strong>提示：</strong>应用层就像系统的"大脑"，负责处理数据和做出决策。</p></div>' : ''}
+                    
+                    ${!gameState.collectedEvidence.includes(evidence.id) ? 
+                        '<div style="display: flex; justify-content: center; margin-top: 30px;">' +
+                        '<button class="btn btn-primary" id="analyzeEvidenceBtn">' +
+                        '<i class="fas fa-search"></i> 分析此证据</button></div>' : 
+                        '<div style="background: rgba(76,175,80,0.1); padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid var(--accent-green); text-align: center;">' +
+                        '<p><i class="fas fa-check-circle" style="color: var(--accent-green);"></i> 此证据已分析完成</p></div>'}
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 添加分析证据按钮事件
+            if (!gameState.collectedEvidence.includes(evidence.id)) {
+                setTimeout(() => {
+                    const analyzeBtn = document.getElementById("analyzeEvidenceBtn");
+                    if (analyzeBtn) {
+                        analyzeBtn.addEventListener("click", () => analyzeEvidence(evidence, modal));
+                    }
+                }, 100);
+            }
+            
+            // 点击模态框外部关闭
+            modal.addEventListener("click", function(e) {
+                if (e.target === this) {
+                    this.remove();
+                }
+            });
+        }
+        
+        // 分析证据
+        function analyzeEvidence(evidence, modal) {
+            if (!gameState.collectedEvidence.includes(evidence.id)) {
+                // 添加到收集列表
+                gameState.collectedEvidence.push(evidence.id);
+                
+                // 增加分数
+                let scoreIncrease = 10;
+                
+                // 角色技能加成
+                if (gameState.playerRole === "sensor_expert" && evidence.layer === "perception") {
+                    scoreIncrease = Math.round(scoreIncrease * 1.25); // 传感器专家加成
+                }
+                
+                gameState.score += scoreIncrease;
+                updateTotalScore();
+                
+                // 根据证据类型激活对应层
+                if (evidence.layer === "perception") {
+                    gameState.analyzedLayers.perception = true;
+                } else if (evidence.layer === "network") {
+                    gameState.analyzedLayers.network = true;
+                } else if (evidence.layer === "application") {
+                    gameState.analyzedLayers.application = true;
+                }
+                
+                // 更新游戏状态
+                updateProgressDisplay();
+                updateIotLayers();
+                
+                // 解锁设备图鉴
+                unlockDevice(evidence.layer, evidence.name);
+                
+                // 检查成就
+                if (gameState.collectedEvidence.length === 1) {
+                    unlockAchievement("first_evidence");
+                }
+                
+                if (gameState.collectedEvidence.length >= 20) {
+                    unlockAchievement("evidence_master");
+                }
+                
+                // 关闭模态框
+                if (modal) modal.remove();
+                
+                // 添加日志
+                addLogEntry(`分析了证据：${evidence.name}`);
+                
+                // 显示成功消息
+                showToast(`成功分析${evidence.name}！获得${scoreIncrease}分。`, "success");
+                
+                // 播放音效
+                playSound("success");
+                
+                // 创建粒子特效
+                createParticleEffect(modal ? modal.querySelector(".modal-content") : document.querySelector(".scene-container"));
+            }
+        }
+        
+        // 执行行动
+        function performAction(action) {
+            // 根据行动ID执行不同操作
+            let message = `执行了行动：${action.name}`;
+            let score = 5;
+            let effect = null;
+            
+            switch(action.id) {
+                case "examine-lock":
+                    message += " - 发现门锁系统存在0.3秒的异常离线记录";
+                    score = 10;
+                    effect = "unlock_evidence:rfid-log";
+                    break;
+                case "review-system":
+                    message += " - 发现系统联动规则存在安全漏洞";
+                    score = 15;
+                    effect = "layer_activation:application";
+                    break;
+                case "trace-dataflow":
+                    message += " - 绘制了案发时段的数据流向图，发现异常传输路径";
+                    score = 10;
+                    effect = "unlock_evidence:wifi-router";
+                    break;
+                case "analyze-protocols":
+                    message += " - 发现蓝牙协议存在安全漏洞，可能被黑客利用";
+                    score = 10;
+                    effect = "layer_activation:network";
+                    break;
+                case "review-code":
+                    message += " - 发现应用程序缺少权限验证模块";
+                    score = 15;
+                    effect = "unlock_evidence:software-code";
+                    break;
+                case "test-vulnerability":
+                    message += " - 成功复现系统漏洞，确认黑客入侵方法";
+                    score = 20;
+                    effect = "unlock_achievement:smart_trap";
+                    break;
+                case "reconstruct-crime":
+                    message += " - 使用三层结构模型完整还原了作案过程";
+                    score = 20;
+                    effect = "layer_activation:all";
+                    break;
+                case "prepare-report":
+                    message += " - 整理了完整的案件分析报告";
+                    score = 15;
+                    effect = "unlock_evidence:full-analysis";
+                    break;
+                case "submit-design":
+                    evaluateDesign();
+                    return;
+            }
+            
+            // 增加分数
+            gameState.score += score;
+            updateTotalScore();
+            
+            // 处理效果
+            if (effect) {
+                processEffect(effect);
+            }
+            
+            // 添加日志
+            addLogEntry(message);
+            
+            // 显示成功消息
+            showToast(`${action.name}完成！获得${score}分。`, "success");
+            
+            // 播放音效
+            playSound("click");
+            
+            // 某些行动会推进场景
+            if (action.id === "test-vulnerability" && gameState.currentScene === 3) {
+                setTimeout(() => {
+                    nextScene();
+                }, 1000);
+            }
+        }
+        
+        // 处理效果
+        function processEffect(effect) {
+            const [type, value] = effect.split(":");
+            
+            switch(type) {
+                case "unlock_evidence":
+                    // 解锁证据
+                    const evidence = scenes[gameState.currentScene - 1].evidences.find(e => e.id === value);
+                    if (evidence && !gameState.collectedEvidence.includes(value)) {
+                        analyzeEvidence(evidence, null);
+                    }
+                    break;
+                    
+                case "layer_activation":
+                    // 激活层级
+                    if (value === "perception") {
+                        gameState.analyzedLayers.perception = true;
+                    } else if (value === "network") {
+                        gameState.analyzedLayers.network = true;
+                    } else if (value === "application") {
+                        gameState.analyzedLayers.application = true;
+                    } else if (value === "all") {
+                        gameState.analyzedLayers.perception = true;
+                        gameState.analyzedLayers.network = true;
+                        gameState.analyzedLayers.application = true;
+                    }
+                    updateIotLayers();
+                    
+                    // 检查成就
+                    if (gameState.analyzedLayers.perception && gameState.analyzedLayers.network && gameState.analyzedLayers.application) {
+                        unlockAchievement("layer_expert");
+                    }
+                    break;
+                    
+                case "bonus_score":
+                    // 额外得分
+                    const bonus = parseInt(value);
+                    gameState.score += bonus;
+                    updateTotalScore();
+                    showToast(`获得额外奖励：${bonus}分`, "info");
+                    break;
+                    
+                case "unlock_achievement":
+                    // 解锁成就
+                    unlockAchievement(value);
+                    break;
+            }
+        }
+        
+        // 使用技能
+        function useSkill() {
+            if (gameState.skillCooldown > 0) {
+                showToast(`技能冷却中，还需${gameState.skillCooldown}个场景`, "warning");
+                return;
+            }
+            
+            const role = roles[gameState.playerRole];
+            if (!role || gameState.skillUsed) {
+                showToast("技能已使用或不可用", "warning");
+                return;
+            }
+            
+            // 根据技能效果执行
+            switch(role.skill.effect) {
+                case "auto_unlock_evidence":
+                    // 自动解锁一个门锁相关证据
+                    const scene = scenes[gameState.currentScene - 1];
+                    const lockEvidence = scene.evidences.find(e => e.name.includes("门锁") || e.name.includes("RFID") || e.name.includes("指纹"));
+                    if (lockEvidence && !gameState.collectedEvidence.includes(lockEvidence.id)) {
+                        analyzeEvidence(lockEvidence, null);
+                        showToast(`技能生效！自动分析了${lockEvidence.name}`, "success");
+                    }
+                    break;
+                    
+                case "extra_network_clue":
+                    // 额外获得网络日志线索
+                    if (gameState.currentScene === 2) {
+                        gameState.score += 15;
+                        updateTotalScore();
+                        showToast("技能生效！发现额外网络日志线索，获得15分", "success");
+                        
+                        // 解锁网络设备图鉴
+                        unlockDevice("network", "WiFi路由器");
+                    }
+                    break;
+                    
+                case "perception_boost":
+                    // 感知层证据分析得分+25%
+                    showToast("技能生效！感知层证据分析得分提升25%", "success");
+                    break;
+                    
+                case "direct_vulnerability_view":
+                    // 直接查看应用层漏洞
+                    if (gameState.currentScene === 3) {
+                        gameState.analyzedLayers.application = true;
+                        updateIotLayers();
+                        showToast("技能生效！直接发现应用层漏洞", "success");
+                    }
+                    break;
+                    
+                case "highlight_connections":
+                    // 高亮显示证据关联
+                    showToast("技能生效！证据之间的关联已被高亮显示", "success");
+                    break;
+                    
+                case "early_layer_activation":
+                    // 提前激活一个物联网层级
+                    if (gameState.currentScene === 1) {
+                        gameState.analyzedLayers.perception = true;
+                    } else if (gameState.currentScene === 2) {
+                        gameState.analyzedLayers.network = true;
+                    } else if (gameState.currentScene === 3) {
+                        gameState.analyzedLayers.application = true;
+                    }
+                    updateIotLayers();
+                    showToast("技能生效！提前激活一个物联网层级", "success");
+                    break;
+            }
+            
+            gameState.skillUsed = true;
+            gameState.skillCooldown = role.skill.cooldown;
+            updateSkillCooldownDisplay();
+            
+            // 更新技能按钮状态
+            document.getElementById("useSkillBtn").disabled = true;
+            document.getElementById("useSkillBtn").innerHTML = `<i class="fas fa-clock"></i> 技能冷却中`;
+            
+            // 解锁成就
+            unlockAchievement("skill_pro");
+        }
+        
+        // 添加设计元素（第五幕）
+        function addDesignElements() {
+            const scene = scenes[4]; // 第五幕
+            const sceneContent = document.getElementById("sceneContent");
+            
+            // 创建设计元素面板
+            const designPanel = document.createElement("div");
+            designPanel.className = "design-panel";
+            designPanel.style.marginTop = "30px";
+            designPanel.style.padding = "20px";
+            designPanel.style.backgroundColor = "var(--secondary-bg)";
+            designPanel.style.borderRadius = "8px";
+            designPanel.style.border = "2px solid var(--border-glow)";
+            
+            designPanel.innerHTML = `
+                <h4 style="color: var(--accent-yellow); margin-bottom: 15px;">
+                    <i class="fas fa-puzzle-piece"></i> 可用的设计组件
+                </h4>
+                <div class="design-elements-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                    ${scene.designElements.map(el => `
+                        <div class="design-element" data-id="${el.id}" data-layer="${el.layer}" 
+                             style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: center; cursor: grab; user-select: none;"
+                             draggable="true">
+                            <i class="fas ${el.icon}" style="color: var(--accent-blue); font-size: 1.8rem; margin-bottom: 10px;"></i>
+                            <p style="font-size: 0.95rem; font-weight: 600;">${el.name}</p>
+                            <small style="color: var(--text-secondary);">${getLayerName(el.layer)}</small>
+                        </div>
+                    `).join('')}
+                </div>
+                <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem; text-align: center;">
+                    <i class="fas fa-info-circle"></i> 提示：将组件拖拽到上方对应的设计区域中
+                </p>
+            `;
+            
+            // 添加到场景内容中
+            const existingPanel = document.querySelector(".design-panel");
+            if (existingPanel) {
+                existingPanel.remove();
+            }
+            
+            sceneContent.appendChild(designPanel);
+            
+            // 设置拖放功能
+            setupDragAndDrop();
+        }
+        
+        // 设置拖放功能
+        function setupDragAndDrop() {
+            const designElements = document.querySelectorAll(".design-element");
+            const designAreas = document.querySelectorAll(".design-area");
+            
+            designElements.forEach(el => {
+                el.addEventListener("dragstart", function(e) {
+                    e.dataTransfer.setData("text/plain", this.dataset.id + "|" + this.dataset.layer);
+                    this.style.opacity = "0.5";
+                });
+                
+                el.addEventListener("dragend", function() {
+                    this.style.opacity = "1";
+                });
+            });
+            
+            designAreas.forEach(area => {
+                area.addEventListener("dragover", function(e) {
+                    e.preventDefault();
+                    this.style.backgroundColor = "rgba(0, 212, 255, 0.1)";
+                });
+                
+                area.addEventListener("dragleave", function() {
+                    this.style.backgroundColor = "";
+                });
+                
+                area.addEventListener("drop", function(e) {
+                    e.preventDefault();
+                    this.style.backgroundColor = "";
+                    
+                    const data = e.dataTransfer.getData("text/plain").split("|");
+                    const elementId = data[0];
+                    const elementLayer = data[1];
+                    
+                    // 获取元素信息
+                    const scene = scenes[4];
+                    const element = scene.designElements.find(el => el.id === elementId);
+                    
+                    if (element) {
+                        // 检查是否放在正确的区域
+                        const targetArea = this.id;
+                        const expectedLayer = targetArea.replace("Design", "").toLowerCase();
+                        
+                        if (expectedLayer === elementLayer) {
+                            // 添加到设计区域
+                            const elementDiv = document.createElement("div");
+                            elementDiv.className = "design-added-item";
+                            elementDiv.style.display = "inline-block";
+                            elementDiv.style.margin = "5px";
+                            elementDiv.style.padding = "8px 15px";
+                            elementDiv.style.backgroundColor = "rgba(0, 212, 255, 0.2)";
+                            elementDiv.style.border = "2px solid var(--accent-blue)";
+                            elementDiv.style.borderRadius = "6px";
+                            elementDiv.innerHTML = `
+                                <i class="fas ${element.icon}"></i> ${element.name}
+                            `;
+                            
+                            // 检查是否已经添加
+                            const existingItems = this.querySelectorAll(".design-added-item");
+                            const alreadyAdded = Array.from(existingItems).some(item => 
+                                item.innerHTML.includes(element.name)
+                            );
+                            
+                            if (!alreadyAdded) {
+                                const placeholder = this.querySelector("p");
+                                if (placeholder) placeholder.style.display = "none";
+                                this.appendChild(elementDiv);
+                                
+                                // 增加分数
+                                gameState.score += 5;
+                                updateTotalScore();
+                                
+                                showToast(`添加了${element.name}到${getLayerName(elementLayer)}设计`, "success");
+                                
+                                // 播放音效
+                                playSound("click");
+                            } else {
+                                showToast(`${element.name}已经添加过了`, "warning");
+                            }
+                        } else {
+                            showToast(`错误：${element.name}属于${getLayerName(elementLayer)}，不能放在${getLayerName(expectedLayer)}区域`, "error");
+                            playSound("error");
+                        }
+                    }
+                });
+            });
+        }
+        
+        // 评估设计
+        function evaluateDesign() {
+            // 获取各个设计区域的组件数量
+            const perceptionCount = document.querySelectorAll("#perceptionDesign .design-added-item").length;
+            const networkCount = document.querySelectorAll("#networkDesign .design-added-item").length;
+            const applicationCount = document.querySelectorAll("#applicationDesign .design-added-item").length;
+            
+            // 评估设计完整性
+            let score = 0;
+            let feedback = "";
+            
+            if (perceptionCount >= 2) score += 20;
+            if (networkCount >= 2) score += 20;
+            if (applicationCount >= 3) score += 30;
+            
+            // 检查是否有权限验证和加密模块
+            const applicationDesign = document.querySelector("#applicationDesign");
+            const networkDesign = document.querySelector("#networkDesign");
+            const hasPermission = applicationDesign ? applicationDesign.innerHTML.includes("权限验证模块") : false;
+            const hasEncryption = networkDesign ? networkDesign.innerHTML.includes("数据加密模块") : false;
+            
+            if (hasPermission) score += 15;
+            if (hasEncryption) score += 15;
+            
+            // 生成反馈
+            if (score >= 80) {
+                feedback = "优秀！你的设计包含了物联网三层结构的完整组件，并且考虑了安全因素（权限验证和数据加密）。这是一个安全可靠的回家场景模式设计。";
+            } else if (score >= 60) {
+                feedback = "良好！你的设计基本涵盖了物联网三层结构，但可以进一步考虑安全加固，比如添加权限验证模块或数据加密。";
+            } else {
+                feedback = "基本合格，但设计不够完整。请确保感知层有至少2个设备，网络层有至少2种传输方式，应用层有至少3个组件，并且考虑安全因素。";
+            }
+            
+            // 显示评估结果
+            const modal = document.createElement("div");
+            modal.className = "modal active";
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    <h2 style="color: var(--accent-blue); text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-clipboard-check"></i> 设计评估结果
+                    </h2>
+                    <div style="text-align: center; font-size: 2rem; color: var(--accent-cyan); margin-bottom: 25px;">
+                        ${score}/100
+                    </div>
+                    <p style="line-height: 1.7; margin-bottom: 25px; font-size: 1.1rem;">${feedback}</p>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; color: var(--accent-blue);">${perceptionCount}/2</div>
+                            <div style="color: var(--text-secondary);">感知层设备</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; color: var(--accent-cyan);">${networkCount}/2</div>
+                            <div style="color: var(--text-secondary);">网络层设备</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 1.5rem; color: var(--accent-red);">${applicationCount}/3</div>
+                            <div style="color: var(--text-secondary);">应用层组件</div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" onclick="this.parentElement.parentElement.parentElement.remove();">
+                            <i class="fas fa-check"></i> 确定
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 增加分数
+            gameState.score += Math.floor(score / 2);
+            updateTotalScore();
+            
+            // 添加日志
+            addLogEntry(`提交了回家场景模式设计方案，评估得分：${score}/100`);
+            
+            // 检查成就
+            if (score === 100) {
+                unlockAchievement("perfect_design");
+            }
+            
+            // 点击模态框外部关闭
+            modal.addEventListener("click", function(e) {
+                if (e.target === this) {
+                    this.remove();
+                }
+            });
+        }
+        
+        // 检查随机事件
+        function checkRandomEvent() {
+            // 10%概率触发事件
+            if (Math.random() < 0.1) {
+                const sceneEvents = randomEvents.filter(event => 
+                    event.triggerScene.includes(gameState.currentScene) && 
+                    !gameState.triggeredEvents.includes(event.id)
+                );
+                
+                if (sceneEvents.length > 0) {
+                    const event = sceneEvents[Math.floor(Math.random() * sceneEvents.length)];
+                    triggerRandomEvent(event);
+                }
+            }
+        }
+        
+        // 触发随机事件
+        function triggerRandomEvent(event) {
+            gameState.triggeredEvents.push(event.id);
+            
+            const modal = document.createElement("div");
+            modal.className = "modal active";
+            
+            let eventContent = "";
+            
+            if (event.choices) {
+                // 有选择的事件
+                eventContent = `
+                    <h2 style="color: var(--accent-red); text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i> ${event.name}
+                    </h2>
+                    <p style="line-height: 1.7; margin-bottom: 25px; font-size: 1.1rem;">${event.description}</p>
+                    
+                    <div class="branch-choices" style="margin-top: 30px;">
+                        ${event.choices.map((choice, index) => `
+                            <div class="choice-option" onclick="handleEventChoice(this, ${choice.score}, '${event.id}')">
+                                <h4 style="color: var(--accent-cyan); margin-bottom: 10px;">${choice.text}</h4>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem;">${choice.result}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else {
+                // 无选择的事件
+                eventContent = `
+                    <h2 style="color: var(--accent-red); text-align: center; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i> ${event.name}
+                    </h2>
+                    <p style="line-height: 1.7; margin-bottom: 25px; font-size: 1.1rem;">${event.description}</p>
+                    
+                    <div style="background: rgba(255,55,95,0.1); padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid var(--accent-red);">
+                        <p><i class="fas fa-info-circle"></i> ${event.effect.action}</p>
+                    </div>
+                    
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" onclick="handleEventEffect(${event.effect.scoreBonus}, '${event.id}')">
+                            <i class="fas fa-check"></i> 确定
+                        </button>
+                    </div>
+                `;
+            }
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <button class="close-modal" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                    ${eventContent}
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 点击模态框外部关闭
+            modal.addEventListener("click", function(e) {
+                if (e.target === this) {
+                    this.remove();
+                }
+            });
+        }
+        
+        // 处理事件选择
+        window.handleEventChoice = function(element, score, eventId) {
+            // 增加分数
+            gameState.score += score;
+            updateTotalScore();
+            
+            // 显示消息
+            if (score > 0) {
+                showToast(`事件处理完成，获得${score}分`, "success");
+            } else if (score < 0) {
+                showToast(`事件处理完成，损失${Math.abs(score)}分`, "error");
+            } else {
+                showToast(`事件处理完成`, "info");
+            }
+            
+            // 关闭模态框
+            element.closest(".modal").remove();
+            
+            // 添加日志
+            addLogEntry(`处理了事件：${eventId}`);
+        };
+        
+        // 处理事件效果
+        window.handleEventEffect = function(scoreBonus, eventId) {
+            // 增加分数
+            if (scoreBonus > 0) {
+                gameState.score += scoreBonus;
+                updateTotalScore();
+                showToast(`成功应对突发事件，获得${scoreBonus}分`, "success");
+            }
+            
+            // 关闭模态框
+            document.querySelector(`.modal[style*="display: flex"]`).remove();
+            
+            // 添加日志
+            addLogEntry(`处理了事件：${eventId}`);
+        };
+        
+        // 解锁成就
+        function unlockAchievement(achievementId) {
+            if (gameState.unlockedAchievements.includes(achievementId)) {
+                return; // 已经解锁
+            }
+            
+            const achievement = achievements[achievementId];
+            if (!achievement) return;
+            
+            // 添加到解锁列表
+            gameState.unlockedAchievements.push(achievementId);
+            
+            // 增加分数
+            gameState.score += achievement.reward;
+            updateTotalScore();
+            
+            // 更新成就显示
+            updateAchievementDisplay();
+            
+            // 显示成就解锁消息
+            showToast(`成就解锁：${achievement.name}！获得${achievement.reward}分`, "success");
+            
+            // 播放音效
+            playSound("success");
+            
+            // 创建特效
+            createParticleEffect(document.querySelector(".scene-container"));
+        }
+        
+        // 解锁设备图鉴
+        function unlockDevice(category, deviceName) {
+            let deviceId = "";
+            
+            // 查找设备ID
+            if (category === "perception") {
+                const device = deviceCollection.sensors.find(d => d.name === deviceName);
+                if (device) deviceId = device.id;
+            } else if (category === "network") {
+                const device = deviceCollection.network.find(d => d.name === deviceName);
+                if (device) deviceId = device.id;
+            }
+            
+            if (deviceId && !gameState.unlockedDevices.includes(deviceId)) {
+                gameState.unlockedDevices.push(deviceId);
+                updateCollectionDisplay();
+                
+                // 检查是否解锁所有设备
+                const totalDevices = deviceCollection.sensors.length + deviceCollection.network.length;
+                if (gameState.unlockedDevices.length >= totalDevices) {
+                    unlockAchievement("iot_master");
+                }
+            }
+        }
+        
+        // 更新成就显示
+        function updateAchievementDisplay() {
+            const grid = document.getElementById("achievementGrid");
+            if (!grid) return;
+            
+            grid.innerHTML = "";
+            
+            // 显示前6个成就（已解锁优先）
+            const allAchievements = Object.values(achievements);
+            const unlocked = allAchievements.filter(a => gameState.unlockedAchievements.includes(a.id));
+            const locked = allAchievements.filter(a => !gameState.unlockedAchievements.includes(a.id) && !a.hidden);
+            
+            const displayAchievements = [...unlocked, ...locked].slice(0, 6);
+            
+            displayAchievements.forEach(achievement => {
+                const isUnlocked = gameState.unlockedAchievements.includes(achievement.id);
+                
+                const card = document.createElement("div");
+                card.className = `achievement-card ${isUnlocked ? "unlocked" : "locked"}`;
+                card.title = achievement.description;
+                
+                card.innerHTML = `
+                    <div class="achievement-icon">
+                        <i class="fas ${achievement.icon}"></i>
+                    </div>
+                    <h4 style="font-size: 0.9rem; margin-bottom: 5px;">${achievement.name}</h4>
+                    <div style="font-size: 0.7rem; color: ${getRarityColor(achievement.rarity)};">
+                        ${achievement.rarity}
+                    </div>
+                `;
+                
+                grid.appendChild(card);
+            });
+            
+            // 更新成就计数
+            document.getElementById("achievementCount").textContent = gameState.unlockedAchievements.length;
+        }
+        
+        // 更新收集显示
+        function updateCollectionDisplay() {
+            const grid = document.getElementById("collectionGrid");
+            if (!grid) return;
+            
+            grid.innerHTML = "";
+            
+            // 显示前8个收集项（已解锁优先）
+            const allDevices = [...deviceCollection.sensors, ...deviceCollection.network];
+            const unlocked = allDevices.filter(d => gameState.unlockedDevices.includes(d.id));
+            const locked = allDevices.filter(d => !gameState.unlockedDevices.includes(d.id));
+            
+            const displayDevices = [...unlocked, ...locked].slice(0, 8);
+            
+            displayDevices.forEach(device => {
+                const isUnlocked = gameState.unlockedDevices.includes(device.id);
+                
+                const item = document.createElement("div");
+                item.className = `collection-item ${isUnlocked ? "unlocked" : "locked"}`;
+                item.title = device.description;
+                
+                item.innerHTML = `
+                    <i class="fas ${device.icon}" style="color: ${isUnlocked ? "var(--accent-green)" : "var(--text-secondary)"}; font-size: 1.5rem; margin-bottom: 8px;"></i>
+                    <p style="font-size: 0.8rem;">${device.name}</p>
+                    <div style="font-size: 0.6rem; color: ${getRarityColor(device.rarity)}; margin-top: 3px;">
+                        ${device.rarity}
+                    </div>
+                `;
+                
+                grid.appendChild(item);
+            });
+        }
+        
+        // 更新排行榜
+        function updateLeaderboard() {
+            const list = document.getElementById("leaderboardList");
+            if (!list) return;
+            
+            list.innerHTML = "";
+            
+            // 添加当前玩家（如果分数足够高）
+            const currentPlayerScore = gameState.score;
+            const currentPlayer = {
+                name: "你",
+                score: currentPlayerScore,
+                role: gameState.playerRole ? roles[gameState.playerRole].name : "未选择",
+                time: formatPlayTime(gameState.playTime)
+            };
+            
+            const allScores = [...leaderboardData, currentPlayer].sort((a, b) => b.score - a.score);
+            const topScores = allScores.slice(0, 8);
+            
+            topScores.forEach((player, index) => {
+                const isCurrentPlayer = player.name === "你";
+                
+                const item = document.createElement("div");
+                item.className = "leaderboard-item";
+                if (isCurrentPlayer) {
+                    item.style.border = "2px solid var(--accent-yellow)";
+                    item.style.backgroundColor = "rgba(255,215,0,0.1)";
+                }
+                
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div class="leaderboard-rank" style="background-color: ${getRankColor(index + 1)};">
+                            ${index + 1}
+                        </div>
+                        <div>
+                            <div style="font-weight: ${isCurrentPlayer ? "bold" : "normal"}; color: ${isCurrentPlayer ? "var(--accent-yellow)" : "var(--text-primary)"}">
+                                ${player.name}
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                ${player.role}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; color: var(--accent-cyan);">${player.score}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-secondary);">${player.time}</div>
+                    </div>
+                `;
+                
+                list.appendChild(item);
+            });
+        }
+        
+        // 更新进度显示
+        function updateProgressDisplay() {
+            // 更新调查进度
+            const baseProgress = gameState.currentScene * 15;
+            const evidenceProgress = gameState.collectedEvidence.length * 3;
+            const investigationProgress = Math.min(baseProgress + evidenceProgress, 100);
+            
+            document.getElementById("investigationProgress").textContent = `${investigationProgress}%`;
+            document.getElementById("investigationProgressBar").style.width = `${investigationProgress}%`;
+            
+            // 更新证据进度
+            const totalEvidence = scenes.reduce((sum, scene) => sum + scene.evidences.length, 0);
+            const evidenceCount = gameState.collectedEvidence.length;
+            const evidencePercent = Math.round((evidenceCount / totalEvidence) * 100);
+            
+            document.getElementById("evidenceProgress").textContent = `${evidenceCount}/${totalEvidence}`;
+            document.getElementById("evidenceProgressBar").style.width = `${evidencePercent}%`;
+            
+            // 更新总得分
+            updateTotalScore();
+        }
+        
+        // 更新总得分
+        function updateTotalScore() {
+            document.getElementById("totalScore").textContent = gameState.score;
+        }
+        
+        // 更新技能冷却显示
+        function updateSkillCooldownDisplay() {
+            const cooldownBar = document.getElementById("skillCooldownBar");
+            const useSkillBtn = document.getElementById("useSkillBtn");
+            
+            if (!gameState.playerRole) {
+                cooldownBar.style.width = "0%";
+                useSkillBtn.disabled = true;
+                return;
+            }
+            
+            const role = roles[gameState.playerRole];
+            const cooldownPercent = gameState.skillCooldown > 0 ? 
+                Math.round((gameState.skillCooldown / role.skill.cooldown) * 100) : 0;
+            
+            cooldownBar.style.width = `${cooldownPercent}%`;
+            
+            if (gameState.skillCooldown > 0 || gameState.skillUsed) {
+                useSkillBtn.disabled = true;
+                useSkillBtn.innerHTML = `<i class="fas fa-clock"></i> 技能冷却中`;
+            } else {
+                useSkillBtn.disabled = false;
+                useSkillBtn.innerHTML = `<i class="fas fa-bolt"></i> 使用技能`;
+            }
+        }
+        
+        // 更新导航按钮
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById("prevSceneBtn");
+            const nextBtn = document.getElementById("nextSceneBtn");
+            
+            // 上一幕按钮状态
+            if (gameState.currentScene === 1) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = "0.5";
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.opacity = "1";
+            }
+            
+            // 下一幕按钮状态和文本
+            if (gameState.currentScene === scenes.length) {
+                nextBtn.innerHTML = '<i class="fas fa-flag-checkered"></i> 完成案件';
+                nextBtn.onclick = finishGame;
+            } else {
+                nextBtn.innerHTML = '下一幕 <i class="fas fa-arrow-right"></i>';
+                nextBtn.onclick = nextScene;
+            }
+        }
+        
+        // 下一场景
+        function nextScene() {
+            // 减少技能冷却
+            if (gameState.skillCooldown > 0) {
+                gameState.skillCooldown--;
+                updateSkillCooldownDisplay();
+            }
+            
+            // 重置技能使用状态（如果冷却结束）
+            if (gameState.skillCooldown === 0) {
+                gameState.skillUsed = false;
+                updateSkillCooldownDisplay();
+            }
+            
+            if (gameState.currentScene < scenes.length) {
+                gameState.currentScene++;
+                updateScene();
+                updateProgressDisplay();
+                
+                // 自动滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                finishGame();
+            }
+        }
+        
+        // 上一场景
+        function prevScene() {
+            if (gameState.currentScene > 1) {
+                gameState.currentScene--;
+                updateScene();
+                updateProgressDisplay();
+                
+                // 自动滚动到顶部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+        
+        // 完成游戏
+        function finishGame() {
+            // 计算最终分数
+            let finalScore = gameState.score;
+            
+            // 时间奖励/惩罚
+            const now = new Date();
+            const playTime = Math.floor((now - gameState.startTime) / 1000 / 60); // 分钟
+            gameState.playTime = playTime;
+            
+            if (playTime <= 30) {
+                finalScore += 30; // 30分钟内完成
+                unlockAchievement("speed_demon");
+            } else if (playTime <= 45) {
+                finalScore += 15; // 45分钟内完成
+            }
+            
+            // 确保分数不超过200
+            finalScore = Math.min(finalScore, 200);
+            
+            // 更新结束模态框内容
+            document.getElementById("finalScore").textContent = finalScore;
+            
+            // 计算各层掌握程度
+            const perceptionScore = gameState.analyzedLayers.perception ? 90 + Math.floor(Math.random() * 10) : 30 + Math.floor(Math.random() * 40);
+            const networkScore = gameState.analyzedLayers.network ? 85 + Math.floor(Math.random() * 15) : 25 + Math.floor(Math.random() * 45);
+            const applicationScore = gameState.analyzedLayers.application ? 95 + Math.floor(Math.random() * 5) : 35 + Math.floor(Math.random() * 40);
+            
+            document.getElementById("perceptionScore").textContent = `${perceptionScore}%`;
+            document.getElementById("perceptionProgressBar").style.width = `${perceptionScore}%`;
+            
+            document.getElementById("networkScore").textContent = `${networkScore}%`;
+            document.getElementById("networkProgressBar").style.width = `${networkScore}%`;
+            
+            document.getElementById("applicationScore").textContent = `${applicationScore}%`;
+            document.getElementById("applicationProgressBar").style.width = `${applicationScore}%`;
+            
+            // 设置结束消息
+            let endMessage = "";
+            if (finalScore >= 150) {
+                endMessage = "完美！你展现了卓越的物联网系统分析能力和安全设计思维。完全掌握了物联网三层结构和工作过程，是当之无愧的物联网神探！";
+                document.getElementById("gameEndTitle").textContent = "完美侦破！物联网神探";
+            } else if (finalScore >= 120) {
+                endMessage = "优秀！你成功侦破了案件，对物联网三层结构有深刻理解。能够运用物联网知识解决实际问题，具备良好的系统分析能力。";
+                document.getElementById("gameEndTitle").textContent = "优秀表现！物联网专家";
+            } else if (finalScore >= 90) {
+                endMessage = "良好！你成功侦破了案件，掌握了物联网的核心概念。能够分析物联网系统漏洞并设计基本的安全方案。";
+                document.getElementById("gameEndTitle").textContent = "案件已侦破";
+            } else {
+                endMessage = "基本合格，案件已侦破。建议回顾物联网三层结构和工作过程，加强对网络层和应用层的理解。";
+                document.getElementById("gameEndTitle").textContent = "案件初步解决";
+            }
+            
+            document.getElementById("gameEndMessage").textContent = endMessage;
+            
+            // 显示结束模态框
+            document.getElementById("endGameModal").classList.add("active");
+            
+            // 保存最终成绩
+            saveGameProgress();
+        }
+        
+        // 保存游戏进度
+        function saveGameProgress() {
+            try {
+                const saveData = {
+                    playerRole: gameState.playerRole,
+                    score: gameState.score,
+                    unlockedAchievements: gameState.unlockedAchievements,
+                    unlockedDevices: gameState.unlockedDevices,
+                    collectedEvidence: gameState.collectedEvidence,
+                    analyzedLayers: gameState.analyzedLayers,
+                    timestamp: new Date().getTime()
+                };
+                
+                localStorage.setItem("iotDetectiveSave", JSON.stringify(saveData));
+                showToast("游戏进度已保存", "success");
+            } catch (e) {
+                console.error("保存游戏进度失败:", e);
+            }
+        }
+        
+        // 加载游戏进度
+        function loadGameProgress() {
+            try {
+                const saveData = localStorage.getItem("iotDetectiveSave");
+                if (saveData) {
+                    const saved = JSON.parse(saveData);
+                    
+                    // 恢复游戏状态
+                    gameState.playerRole = saved.playerRole;
+                    gameState.score = saved.score || 0;
+                    gameState.unlockedAchievements = saved.unlockedAchievements || [];
+                    gameState.unlockedDevices = saved.unlockedDevices || [];
+                    gameState.collectedEvidence = saved.collectedEvidence || [];
+                    gameState.analyzedLayers = saved.analyzedLayers || {
+                        perception: false,
+                        network: false,
+                        application: false
+                    };
+                    
+                    // 更新显示
+                    if (gameState.playerRole) {
+                        const role = roles[gameState.playerRole];
+                        document.getElementById("roleName").textContent = role.name;
+                        document.getElementById("roleDescription").textContent = role.description;
+                        document.getElementById("roleAvatar").innerHTML = `<i class="fas ${role.icon}"></i>`;
+                        document.getElementById("roleAvatar").style.background = `linear-gradient(135deg, ${role.color}, ${role.color}99)`;
+                        
+                        document.getElementById("skillName").textContent = role.skill.name;
+                        document.getElementById("skillDescription").textContent = role.skill.description;
+                        document.getElementById("skillIcon").innerHTML = `<i class="fas ${role.skill.icon}"></i>`;
+                    }
+                    
+                    updateTotalScore();
+                    updateAchievementDisplay();
+                    updateCollectionDisplay();
+                    updateIotLayers();
+                    updateProgressDisplay();
+                    
+                    showToast("游戏进度已加载", "info");
+                }
+            } catch (e) {
+                console.error("加载游戏进度失败:", e);
+            }
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            if (confirm("确定要重新开始游戏吗？所有进度将丢失。")) {
+                localStorage.removeItem("iotDetectiveSave");
+                location.reload();
+            }
+        }
+        
+        // 分享成绩
+        function shareResults() {
+            const finalScore = document.getElementById("finalScore").textContent;
+            const achievementCount = gameState.unlockedAchievements.length;
+            
+            const shareText = `我在《物联网神探：科技馆失窃案》中获得了${finalScore}分，解锁了${achievementCount}个成就！你也来挑战吧！`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: '物联网神探成绩单',
+                    text: shareText,
+                    url: window.location.href
+                });
+            } else {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showToast("成绩已复制到剪贴板", "success");
+                });
+            }
+        }
+        
+        // 添加日志条目
+        function addLogEntry(event) {
+            // 在实际实现中，这里可以添加日志功能
+            console.log(`[LOG] ${event}`);
+        }
+        
+        // 显示Toast消息
+        function showToast(message, type = "success") {
+            // 创建Toast元素
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            toast.style.position = "fixed";
+            toast.style.bottom = "30px";
+            toast.style.right = "30px";
+            toast.style.padding = "15px 25px";
+            toast.style.borderRadius = "8px";
+            toast.style.zIndex = "1001";
+            toast.style.boxShadow = "0 10px 30px rgba(0,0,0,0.3)";
+            toast.style.maxWidth = "350px";
+            toast.style.wordBreak = "break-word";
+            toast.style.backdropFilter = "blur(10px)";
+            
+            document.body.appendChild(toast);
+            
+            // 3秒后移除
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transition = "opacity 0.5s";
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 500);
+            }, 3000);
+        }
+        
+        // 创建粒子特效
+        function createParticleEffect(element) {
+            if (!element) return;
+            
+            const rect = element.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement("div");
+                particle.className = "particle";
+                particle.style.width = "8px";
+                particle.style.height = "8px";
+                particle.style.borderRadius = "50%";
+                particle.style.backgroundColor = `hsl(${Math.random() * 60 + 180}, 100%, 60%)`;
+                particle.style.left = `${centerX}px`;
+                particle.style.top = `${centerY}px`;
+                
+                document.body.appendChild(particle);
+                
+                // 随机方向运动
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 50 + Math.random() * 100;
+                const duration = 0.8 + Math.random() * 0.4;
+                
+                particle.animate([
+                    { 
+                        transform: `translate(0, 0) scale(1)`, 
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`, 
+                        opacity: 0 
+                    }
+                ], {
+                    duration: duration * 1000,
+                    easing: "cubic-bezier(0.215, 0.610, 0.355, 1)"
+                });
+                
+                // 移除粒子
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, duration * 1000);
+            }
+        }
+        
+        // 播放音效
+        function playSound(type) {
+            try {
+                const audio = document.getElementById(`${type}Sound`);
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log("音频播放失败:", e));
+                }
+            } catch (e) {
+                console.log("音效播放失败:", e);
+            }
+        }
+        
+        // 更新当前时间
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeString = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            document.getElementById("currentTime").textContent = timeString;
+        }
+        
+        // 格式化游戏时间
+        function formatPlayTime(minutes) {
+            if (minutes < 60) {
+                return `${minutes}分钟`;
+            } else {
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                return `${hours}小时${mins}分钟`;
+            }
+        }
+        
+        // 获取层级名称
+        function getLayerName(layerKey) {
+            const layers = {
+                "perception": "感知层",
+                "network": "网络层", 
+                "application": "应用层",
+                "all": "全部层级"
+            };
+            return layers[layerKey] || layerKey;
+        }
+        
+        // 获取稀有度颜色
+        function getRarityColor(rarity) {
+            const colors = {
+                "普通": "var(--text-secondary)",
+                "稀有": "var(--accent-blue)",
+                "史诗": "var(--accent-purple)",
+                "传奇": "var(--accent-yellow)"
+            };
+            return colors[rarity] || "var(--text-secondary)";
+        }
+        
+        // 获取排名颜色
+        function getRankColor(rank) {
+            if (rank === 1) return "var(--accent-yellow)";
+            if (rank === 2) return "var(--accent-cyan)";
+            if (rank === 3) return "var(--accent-blue)";
+            return "var(--secondary-bg)";
+        }
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 导航按钮
+            document.getElementById("prevSceneBtn").addEventListener("click", prevScene);
+            document.getElementById("nextSceneBtn").addEventListener("click", nextScene);
+            
+            // 保存和重置按钮
+            document.getElementById("saveGameBtn").addEventListener("click", saveGameProgress);
+            document.getElementById("resetGameBtn").addEventListener("click", resetGame);
+            
+            // 技能按钮
+            document.getElementById("useSkillBtn").addEventListener("click", useSkill);
+            
+            // 模态框关闭按钮
+            document.getElementById("closeRoleModal").addEventListener("click", function() {
+                document.getElementById("roleSelectionModal").classList.remove("active");
+            });
+            
+            document.getElementById("closeAchievementsModal").addEventListener("click", function() {
+                document.getElementById("achievementsModal").classList.remove("active");
+            });
+            
+            document.getElementById("closeCollectionsModal").addEventListener("click", function() {
+                document.getElementById("collectionsModal").classList.remove("active");
+            });
+            
+            document.getElementById("closeMinigameModal").addEventListener("click", function() {
+                document.getElementById("minigameModal").classList.remove("active");
+            });
+            
+            // 查看成就按钮
+            document.getElementById("viewAllAchievementsBtn").addEventListener("click", function() {
+                const modal = document.getElementById("achievementsModal");
+                const container = document.getElementById("allAchievementsContainer");
+                
+                container.innerHTML = "";
+                
+                // 显示所有成就
+                Object.values(achievements).forEach(achievement => {
+                    const isUnlocked = gameState.unlockedAchievements.includes(achievement.id);
+                    const isHidden = achievement.hidden && !isUnlocked;
+                    
+                    if (isHidden) return; // 不显示隐藏的未解锁成就
+                    
+                    const card = document.createElement("div");
+                    card.className = `achievement-card ${isUnlocked ? "unlocked" : "locked"}`;
+                    card.style.cursor = "pointer";
+                    card.title = achievement.description;
+                    
+                    card.innerHTML = `
+                        <div class="achievement-icon">
+                            <i class="fas ${achievement.icon}"></i>
+                        </div>
+                        <h4 style="font-size: 0.9rem; margin-bottom: 5px;">${achievement.name}</h4>
+                        <div style="font-size: 0.7rem; color: ${getRarityColor(achievement.rarity)};">
+                            ${achievement.rarity}
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">
+                            ${isUnlocked ? "已解锁" : "未解锁"}
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+                
+                modal.classList.add("active");
+            });
+            
+            // 查看图鉴按钮
+            document.getElementById("viewAllCollectionsBtn").addEventListener("click", function() {
+                const modal = document.getElementById("collectionsModal");
+                const sensorGrid = document.getElementById("sensorCollectionGrid");
+                const networkGrid = document.getElementById("networkCollectionGrid");
+                
+                sensorGrid.innerHTML = "";
+                networkGrid.innerHTML = "";
+                
+                // 显示传感器图鉴
+                deviceCollection.sensors.forEach(device => {
+                    const isUnlocked = gameState.unlockedDevices.includes(device.id);
+                    
+                    const item = document.createElement("div");
+                    item.className = `collection-item ${isUnlocked ? "unlocked" : "locked"}`;
+                    item.title = device.description;
+                    
+                    item.innerHTML = `
+                        <i class="fas ${device.icon}" style="color: ${isUnlocked ? "var(--accent-green)" : "var(--text-secondary)"}; font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.9rem; font-weight: 600;">${device.name}</p>
+                        <div style="font-size: 0.7rem; color: ${getRarityColor(device.rarity)}; margin-top: 5px;">
+                            ${device.rarity}
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">
+                            ${isUnlocked ? "已收集" : "未收集"}
+                        </div>
+                    `;
+                    
+                    sensorGrid.appendChild(item);
+                });
+                
+                // 显示网络设备图鉴
+                deviceCollection.network.forEach(device => {
+                    const isUnlocked = gameState.unlockedDevices.includes(device.id);
+                    
+                    const item = document.createElement("div");
+                    item.className = `collection-item ${isUnlocked ? "unlocked" : "locked"}`;
+                    item.title = device.description;
+                    
+                    item.innerHTML = `
+                        <i class="fas ${device.icon}" style="color: ${isUnlocked ? "var(--accent-green)" : "var(--text-secondary)"}; font-size: 2rem; margin-bottom: 10px;"></i>
+                        <p style="font-size: 0.9rem; font-weight: 600;">${device.name}</p>
+                        <div style="font-size: 0.7rem; color: ${getRarityColor(device.rarity)}; margin-top: 5px;">
+                            ${device.rarity}
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-secondary); margin-top: 5px;">
+                            ${isUnlocked ? "已收集" : "未收集"}
+                        </div>
+                    `;
+                    
+                    networkGrid.appendChild(item);
+                });
+                
+                modal.classList.add("active");
+            });
+            
+            // 刷新排行榜按钮
+            document.getElementById("refreshLeaderboardBtn").addEventListener("click", updateLeaderboard);
+            
+            // 重新开始游戏按钮
+            document.getElementById("restartGameBtn").addEventListener("click", resetGame);
+            
+            // 分享成绩按钮
+            document.getElementById("shareResultsBtn").addEventListener("click", shareResults);
+            
+            // 点击模态框外部关闭
+            const modals = document.querySelectorAll(".modal");
+            modals.forEach(modal => {
+                modal.addEventListener("click", function(e) {
+                    if (e.target === this) {
+                        this.classList.remove("active");
+                    }
+                });
+            });
+            
+            // 设置迷你游戏按钮的全局函数
+            window.checkPacketOrder = checkPacketOrder;
+            window.selectDevice = selectDevice;
+            window.selectProtocol = selectProtocol;
+            window.dragComponent = dragComponent;
+            window.allowDrop = allowDrop;
+            window.dropComponent = dropComponent;
+            window.handleEventChoice = handleEventChoice;
+            window.handleEventEffect = handleEventEffect;
+            
+            // 为迷你游戏按钮添加事件（委托方式）
+            document.addEventListener("click", function(e) {
+                if (e.target && e.target.id === "checkPacketOrderBtn") {
+                    checkPacketOrder();
+                }
+                if (e.target && e.target.id === "resetPacketGameBtn") {
+                    // 重新开始数据包排序游戏
+                    const minigameId = "packet_sorting";
+                    const content = document.getElementById("minigameContent");
+                    const minigame = minigames[minigameId];
+                    content.innerHTML = createPacketSortingGame(minigame);
+                }
+                if (e.target && e.target.id === "checkMatchingGameBtn") {
+                    // 检查协议匹配游戏
+                    finishMatchingGame();
+                }
+                if (e.target && e.target.id === "resetMatchingGameBtn") {
+                    // 重新开始协议匹配游戏
+                    const minigameId = "protocol_matching";
+                    const content = document.getElementById("minigameContent");
+                    const minigame = minigames[minigameId];
+                    content.innerHTML = createProtocolMatchingGame(minigame);
+                }
+                if (e.target && e.target.id === "checkPuzzleGameBtn") {
+                    // 检查拼图游戏
+                    finishPuzzleGame();
+                }
+                if (e.target && e.target.id === "resetPuzzleGameBtn") {
+                    // 重新开始拼图游戏
+                    const minigameId = "layer_puzzle";
+                    const content = document.getElementById("minigameContent");
+                    const minigame = minigames[minigameId];
+                    content.innerHTML = createLayerPuzzleGame(minigame);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
